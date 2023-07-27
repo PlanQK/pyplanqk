@@ -1,0 +1,156 @@
+openapi: 3.0.0
+info:
+  version: "1.0"
+  title: Managed PlanQK Service
+  description: |
+    Generic API description for a managed PlanQK Service.
+paths:
+  /:
+    get:
+      tags:
+        - Status API
+      summary: Health checking endpoint
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    title: Status of the service
+                    type: string
+                    example: Service is up and running
+    post:
+      tags:
+        - Service API
+      summary: Asynchronous execution of the service
+      description: This method starts an execution of the service, which in turn is processed asynchronously by the platform. The location header of the response contains the URL which can be used to query the status and the result of the execution.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                params:
+                  type: object
+            example:
+              data: { "values": [ 100, 50, 200, 70, 0.69 ] }
+              params: { "round_off": false }
+      responses:
+        "201":
+          description: Execution of the service started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/job"
+              example:
+                id: 87cb778e-ac43-11ec-b909-0242ac120002
+                status: PENDING
+                createdAt: "2022-01-01 22:38:01"
+          headers:
+            Location:
+              description: URL to query the status and the result of the execution
+              schema:
+                type: string
+        "400":
+          description: Invalid input
+        "500":
+          description: Internal server error
+
+  /{id}:
+    get:
+      tags:
+        - Service API
+      summary: Check execution status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of a certain execution
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/job"
+              example:
+                id: 87cb778e-ac43-11ec-b909-0242ac120002
+                status: SUCCEEDED
+                createdAt: "2022-01-01 22:38:08"
+                startedAt: "2022-01-01 22:39:08"
+                endedAt: "2022-01-01 22:40:08"
+        "400":
+          description: Invalid input
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+  /{id}/result:
+    get:
+      tags:
+        - Service API
+      summary: Get the result of an execution
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of a certain execution
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    description: service-specific result object
+                  metadata:
+                    type: object
+                    description: service-specific metadata object which contains additional information besides the actual results
+                  code:
+                    type: string
+                    description: service-specific error code representing the type of problem encountered
+                  detail:
+                    type: string
+                    description: service-specific error message describing the detail of the problem encountered
+              example:
+                result: 420.69
+        "400":
+          description: Invalid input
+        "403":
+          description: Forbidden
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+
+components:
+  schemas:
+    job:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [UNKNOWN, PENDING, RUNNING, SUCCEEDED, FAILED]
+        createdAt:
+          type: string
+        startedAt:
+          type: string
+        endedAt:
+          type: string
