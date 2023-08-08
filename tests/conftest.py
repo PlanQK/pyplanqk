@@ -3,6 +3,7 @@ import uuid
 
 from pyplanqk.low_level_actions import *
 from pyplanqk.helpers import *
+from typing import Dict, Tuple, List
 
 logger = logging.getLogger("pyplanqk")
 
@@ -26,24 +27,34 @@ def configure_logger():
 
 
 @pytest.fixture(scope="function")
-def api_key():
+def api_key() -> Dict[str, str]:
     api_key = "bb7f15afefee47362632a3f04dfdd8ee2f0fd5403a6588191df9465ddcf3a7d1e5d2339b4f83538af2d9b8b98d7fdd7e"
     api_key = {"apiKey": api_key}
     return api_key
 
 
 @pytest.fixture(scope="function")
-def token_url():
+def timeout() -> int:
+    return 500
+
+
+@pytest.fixture(scope="function")
+def step() -> int:
+    return 15
+
+
+@pytest.fixture(scope="function")
+def token_url() -> str:
     return "https://gateway.platform.planqk.de/token"
 
 
 @pytest.fixture(scope="function")
-def consumer_key():
+def consumer_key() -> str:
     return "wC1Dkq6ZPW7CRBUSB1oL5cURA_ga"
 
 
 @pytest.fixture(scope="function")
-def train_data():
+def train_data() -> Dict[str, list]:
     data = dict()
 
     data["X_train"] = list()
@@ -94,13 +105,11 @@ def train_data():
     data["y_test"].append((0.0, 1.0))
     data["y_test"].append((0.0, 1.0))
 
-
     return data
 
 
 @pytest.fixture(scope="function")
-def train_params():
-
+def train_params() -> Dict[str, str]:
     params = dict()
 
     params["mode"] = "train"
@@ -112,7 +121,7 @@ def train_params():
 
 
 @pytest.fixture(scope="function")
-def config():
+def config() -> Dict[str, str]:
     config = dict()
     config["name"] = f"service_{str(uuid.uuid4())}"
     config["description"] = "Service"
@@ -129,7 +138,7 @@ def config():
 
 
 @pytest.fixture(scope="function")
-def access_token():
+def access_token() -> str:
     consumer_key = "wC1Dkq6ZPW7CRBUSB1oL5cURA_ga"
     consumer_secret = "o5oiJrJrNLbIuJPGk46vJyHfDj4a"
     token_url = "https://gateway.platform.planqk.de/token"
@@ -140,10 +149,11 @@ def access_token():
 
 
 @pytest.fixture(scope="function")
-def simple_service(config, api_key: Dict[str, str]):
+def simple_service(config: Dict[str, str],
+                   api_key: Dict[str, str]) -> ServiceDto:
     service = create_managed_service(config, api_key)
-    service_id = service["id"]
-    version_id = service["service_definitions"][0]["id"]
+    service_id = service.id
+    version_id = service.service_definitions[0].id
 
     wait_for_service_to_be_created(service_id, version_id, api_key, timeout=500, step=5)
 
@@ -151,27 +161,29 @@ def simple_service(config, api_key: Dict[str, str]):
 
 
 @pytest.fixture(scope="function")
-def internally_published_service(config, api_key: Dict[str, str]):
+def internally_published_service(config: Dict[str, str],
+                                 api_key: Dict[str, str]) -> ServiceDto:
     service = create_managed_service(config, api_key)
-    service_id = service["id"]
-    version_id = service["service_definitions"][0]["id"]
+    service_name = service.name
+    service_id = service.id
+    version_id = service.service_definitions[0].id
 
     wait_for_service_to_be_created(service_id, version_id, api_key, timeout=500, step=5)
 
-    publish_service_internally(service_id, version_id, api_key)
+    publish_service_internally(service_name, api_key)
 
     return service
 
 
 @pytest.fixture(scope="function")
-def simple_application(api_key: Dict[str, str]):
+def simple_application(api_key: Dict[str, str]) -> ApplicationDto:
     application_name = f"application_{str(uuid.uuid4())}"
     application = create_application(application_name, api_key)
     return application
 
 
 @pytest.fixture(scope="function")
-def application_with_auth(api_key: Dict[str, str]):
+def application_with_auth(api_key: Dict[str, str]) -> Tuple[ApplicationDto, str, str]:
     application_name = f"application_{str(uuid.uuid4())}"
     application = create_application(application_name, api_key)
     assert application is not None
@@ -183,11 +195,10 @@ def application_with_auth(api_key: Dict[str, str]):
 
 
 @pytest.fixture(scope="function")
-def full_application(config, api_key: Dict[str, str]):
-
+def full_application(config,
+                     api_key: Dict[str, str]) -> Tuple[ApplicationDto, ServiceDto, str, str]:
     application_name = f"application_{str(uuid.uuid4())}"
     application = create_application(application_name, api_key)
-    application_id = application["id"]
 
     print("Enter consumer_key:")
     consumer_key = input()
@@ -196,39 +207,58 @@ def full_application(config, api_key: Dict[str, str]):
 
     service = create_managed_service(config, api_key)
 
-    service_id = service["id"]
-    version_id = service["service_definitions"][0]["id"]
+    service_name = service.name
+    service_id = service.id
+    version_id = service.service_definitions[0].id
 
     wait_for_service_to_be_created(service_id, version_id, api_key, timeout=500, step=5)
 
-    publish_service_internally(service_id, version_id, api_key)
+    publish_service_internally(service_name, api_key)
 
-    subscribe_application_to_service(application_id, service_id, api_key)
+    subscribe_application_to_service(application_name, service_name, api_key)
 
     return application, service, consumer_key, consumer_secret
 
 
-def cleanup_services_and_applications(applications, services, api_key: Dict[str, str]):
+@pytest.fixture(scope="function")
+def service_job(data: Dict[str, list],
+                params: Dict[str, str],
+                api_key: Dict[str, str]) -> JobDto:
+    logger.debug("Trigger service job")
+    configuration = Configuration(api_key=api_key)
+    api_client = ApiClient(configuration=configuration)
+    service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
+
+    create_job_request = CreateJobRequest(service_definition_id="596ffd0c-2551-4564-83f6-851f64078497",
+                                          input_data=json.dumps(data),
+                                          parameters=json.dumps(params),
+                                          serviceDefinition="596ffd0c-2551-4564-83f6-851f64078497",
+                                          persist_result=True)
+    job = service_jobs_api.create_job(create_job_request=create_job_request)
+    return job
+
+
+def cleanup_services_and_applications(applications: List[ApplicationDto],
+                                      services: List[ServiceDto],
+                                      api_key: Dict[str, str]):
     logger.debug("")
     logger.debug("")
     logger.debug("cleanup_services_and_applications")
     for application in applications:
-        application_id = application["id"]
-        subscriptions = get_all_subscriptions(application_id, api_key)
+        application_name = application.name
+        subscriptions = get_all_subscriptions(application_name, api_key)
 
-        for subscription in subscriptions:
-            subscription_id = subscription["id"]
-            remove_subscription(application_id, subscription_id, api_key)
-            logger.debug(f"remove_subscription: {application_id}, {subscription_id}")
+        for _ in subscriptions:
+            remove_subscription(application_name, api_key)
 
-        remove_application(application_id, api_key)
-        logger.debug(f"remove_application: {application_id}")
+        remove_application(application_name, api_key)
+        logger.debug(f"remove_application: {application_name}")
 
     for service in services:
-        service_id = service["id"]
-        version = get_version(service_id, api_key)
-        version_id = version["id"]
-        unpublish_service(service_id, version_id, api_key)
-        logger.debug(f"unpublish_service: {service_id}, {version_id}")
-        remove_service(service_id, api_key)
-        logger.debug(f"remove_service: {service_id}")
+        service_name = service.name
+        version = get_version(service_name, api_key)
+        version_id = version.id
+        unpublish_service(service_name, api_key)
+        logger.debug(f"unpublish_service: {service_name}, {version_id}")
+        remove_service(service_name, api_key)
+        logger.debug(f"remove_service: {service_name}")

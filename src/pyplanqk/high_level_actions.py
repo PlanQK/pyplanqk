@@ -1,5 +1,6 @@
 from pyplanqk.low_level_actions import *
 from pyplanqk.helpers import *
+from typing import Tuple
 
 logger = logging.getLogger("pyplanqk")
 
@@ -10,21 +11,24 @@ class PyPlanQK:
         self.api_key = {"apiKey": api_key}
         self.token_url = "https://gateway.platform.planqk.de/token"
 
-    def create_application_service(self, config, application_name: str):
+    def create_application_service(self,
+                                   config: Dict[str, str],
+                                   application_name: str) -> Optional[Tuple[ServiceDto, ApplicationDto]]:
         try:
             # create service
             service = create_managed_service(config, self.api_key)
             assert service is not None
+            service_id = service.id
 
-            service_id = service["id"]
-            version_id = service["service_definitions"][0]["id"]
-            result = wait_for_service_to_be_created(service_id, version_id, self.api_key, timeout=500, step=5)
+            service_name = service.name
+            version = get_version(service_name, self.api_key)
+            version_id = version.id
+            result = wait_for_service_to_be_created(
+                service_id, version_id, self.api_key, timeout=500, step=5)
             assert result is not None
 
             # publish service
-            service_id = service["id"]
-            version_id = service["service_definitions"][0]["id"]
-            result = publish_service_internally(service_id, version_id, self.api_key)
+            result = publish_service_internally(service_name, self.api_key)
             assert result is not None
 
             # get application
@@ -35,15 +39,12 @@ class PyPlanQK:
                 assert application is not None
 
             # subscribe application to service
-            application_id = application["id"]
-            result = subscribe_application_to_service(application_id, service_id, self.api_key)
+            application_name = application.name
+            result = subscribe_application_to_service(
+                application_name, service_name, self.api_key)
             assert result is not None
 
-            result = dict()
-            result["service"] = service
-            result["application"] = application
-
-            return result
+            return service, application
         except Exception as e:
             logger.debug(e)
             return None
@@ -52,23 +53,25 @@ class PyPlanQK:
                                     service_name: str,
                                     consumer_key: str,
                                     consumer_secret: str,
-                                    data,
-                                    params):
+                                    data: Dict[str, list],
+                                    params: Dict[str, str]) -> Optional[Dict[str, str]]:
         service = get_service(service_name, self.api_key, lifecycle="ACCESSIBLE")
         access_token = get_access_token(consumer_key, consumer_secret, self.token_url)
 
-        service_id = service["id"]
-        job = trigger_application_execution(service_id, data, params, access_token, self.api_key)
+        service_name = service.name
+        job = trigger_application_job(
+            service_name, data, params, access_token, self.api_key)
         assert job is not None
 
         job_id = job["id"]
-        version = get_version(service_id, self.api_key)
+        version = get_version(service_name, self.api_key)
         service_endpoint = version.gateway_endpoint
         service_endpoint = f"{service_endpoint}/{job_id}"
-        result = wait_for_execution_to_be_finished(service_endpoint, access_token)
+        result = wait_for_application_job_to_be_finished(service_endpoint, access_token)
         assert result
 
-        result = get_application_job_result(service_id, job_id, access_token, self.api_key)
+        result = get_application_job_result(
+            service_id, job_id, access_token, self.api_key)
         assert result is not None
 
         return result

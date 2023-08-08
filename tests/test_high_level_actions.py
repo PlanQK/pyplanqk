@@ -3,36 +3,44 @@ import uuid
 from pyplanqk.high_level_actions import PyPlanQK
 from pyplanqk.low_level_actions import *
 from conftest import cleanup_services_and_applications
+from typing import Tuple, Dict
 
 logger = logging.getLogger("pyplanqk")
 
 
-def test_create_application_service(config, api_key):
+def test_create_application_service(config: Dict[str, str],
+                                    api_key: Dict[str, str]):
     logger.debug("test_create_application_service")
+    applications = []
+    services = []
 
     try:
         application_name = f"application_{str(uuid.uuid4())}"
         plnqk = PyPlanQK(api_key["apiKey"])
-        result = plnqk.create_application_service(config, application_name)
-        service = result["service"]
-        application = result["application"]
-        assert service is not None
-        assert application is not None
+        service, application = plnqk.create_application_service(
+            config, application_name)
+        assert type(service) == ServiceDto
+        assert type(application) == ApplicationDto
+        applications.append(application)
+        services.append(service)
     except Exception as e:
         logger.debug(e)
 
-    applications = [application]
-    services = [service]
     cleanup_services_and_applications(applications, services, api_key)
 
 
-def test_execute_application_service_train(full_application, api_key, train_data, train_params):
+def test_execute_application_service_train(full_application: Tuple[ApplicationDto, ServiceDto, str, str],
+                                           api_key: Dict[str, str],
+                                           train_data: Dict[str, list],
+                                           train_params: Dict[str, str]):
     logger.debug("test_execute_application_service_train")
+    application, service, consumer_key, consumer_secret = full_application
+    applications = [application]
+    services = [service]
 
     try:
-        application, service, consumer_key, consumer_secret = full_application
         plnqk = PyPlanQK(api_key["apiKey"])
-        service_name = service["name"]
+        service_name = service.name
         result = plnqk.execute_application_service(service_name,
                                                    consumer_key,
                                                    consumer_secret,
@@ -42,18 +50,21 @@ def test_execute_application_service_train(full_application, api_key, train_data
     except Exception as e:
         logger.debug(e)
 
-    applications = [application]
-    services = [service]
     cleanup_services_and_applications(applications, services, api_key)
 
 
-def test_execute_application_service_predict(full_application, api_key, train_data, train_params):
+def test_execute_application_service_predict(full_application: Tuple[ApplicationDto, ServiceDto, str, str],
+                                             api_key: Dict[str, str],
+                                             train_data: Dict[str, list],
+                                             train_params: Dict[str, str]):
     logger.debug("test_execute_application_service_predict")
+    applications = []
+    services = []
 
     try:
         application, service, consumer_key, consumer_secret = full_application
         plnqk = PyPlanQK(api_key["apiKey"])
-        service_name = service["name"]
+        service_name = service.name
         result = plnqk.execute_application_service(service_name,
                                                    consumer_key,
                                                    consumer_secret,
@@ -76,10 +87,9 @@ def test_execute_application_service_predict(full_application, api_key, train_da
                                                    predict_data,
                                                    predict_params)
         assert result is not None
-
+        applications.append(application)
+        services.append(service)
     except Exception as e:
         logger.debug(e)
 
-    applications = [application]
-    services = [service]
     cleanup_services_and_applications(applications, services, api_key)
