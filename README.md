@@ -1,4 +1,4 @@
-# Set up environment
+#o Set up environment
 ````shell
 python -m venv venv
 source venv/bin/activate

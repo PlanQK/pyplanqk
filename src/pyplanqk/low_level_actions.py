@@ -1,30 +1,34 @@
 import os
 import json
 
-from openapi_client.apis import ServicePlatformApplicationsApi
 from pyplanqk.helpers import *
-from typing import Dict, Optional, List
+
+from openapi_client.apis import ServicePlatformApplicationsApi
+
+from typing import Optional, List
 
 logger = logging.getLogger("pyplanqk")
 
 
 def create_managed_service(config: Dict[str, str],
                            api_key: Dict[str, str]) -> Optional[ServiceDto]:
-    logger.debug("Create service")
+    logger.debug("Create managed service")
 
     configuration = Configuration(api_key=api_key)
     api_client = ApiClient(configuration=configuration)
     services_api = ServicePlatformServicesApi(api_client=api_client)
 
     try:
-        service = services_api.create_managed_service(**config)
+        config_ = dict(**config)
+        config_["user_code"] = open(config_["user_code"], "rb")
+        config_["api_definition"] = open(config_["api_definition"], "rb")
+        service = services_api.create_managed_service(**config_)
         assert service is not None
         logger.debug("Service creation triggered.")
     except Exception as e:
         service = None
         logger.debug("Service creation failed.")
         logger.debug(e)
-
     return service
 
 
@@ -46,7 +50,6 @@ def create_application(application_name: str,
         application = None
         logger.debug("Create application failed.")
         logger.debug(e)
-
     return application
 
 
@@ -70,7 +73,6 @@ def publish_service_internally(service_name: str,
         service = None
         logger.debug("Service publishing internally failed")
         logger.debug(e)
-
     return service
 
 
@@ -95,7 +97,6 @@ def unpublish_service(service_name: str,
         service = None
         logger.debug("Service unpublishing failed")
         logger.debug(e)
-
     return service
 
 
@@ -117,7 +118,6 @@ def remove_service(service_name: str,
         response = False
         logger.debug("Service removing failed")
         logger.debug(e)
-
     return response
 
 
@@ -139,7 +139,6 @@ def remove_application(application_name: str,
         response = False
         logger.debug("Application removing failed")
         logger.debug(e)
-
     return response
 
 
@@ -164,7 +163,6 @@ def remove_subscription(application_name: str,
         response = False
         logger.debug("Subscription removal failed")
         logger.debug(e)
-
     return response
 
 
@@ -194,7 +192,6 @@ def subscribe_application_to_service(application_name: str,
         subscription = None
         logger.debug("Application subscription failed")
         logger.debug(e)
-
     return subscription
 
 
@@ -218,7 +215,6 @@ def get_application(application_name: str,
         found_application = None
         logger.debug("Application retrieval failed")
         logger.debug(e)
-
     return found_application
 
 
@@ -248,17 +244,15 @@ def get_services(api_key: Dict[str, str],
         else:
             services = services_api.get_services(lifecycle=lifecycle)
             assert services is not None
-
     except Exception as e:
         services = None
         logger.debug("Services retrieval failed")
         logger.debug(e)
-
     return services
 
 
 def get_service(service_name: str,
-                api_key: Dict[str, str]) -> Optional[ServiceOverviewDto]:
+                api_key: Dict[str, str]) -> Optional[ServiceDto]:
     logger.debug("Get service")
 
     configuration = Configuration(api_key=api_key)
@@ -278,17 +272,15 @@ def get_service(service_name: str,
 
         service_id = found_service.id
         found_service = services_api.get_service(service_id)
-
     except Exception as e:
         found_service = None
         logger.debug("Service retrieval failed")
         logger.debug(e)
-
     return found_service
 
 
 def get_version(service_name: str,
-                api_key: Dict[str, str]) -> Optional[ServiceDto]:
+                api_key: Dict[str, str]) -> Optional[ServiceDefinitionDto]:
     logger.debug("Get version")
 
     try:
@@ -318,7 +310,6 @@ def get_all_subscriptions(application_name: str,
         subscriptions = None
         logger.debug("Subscriptions retrieval failed")
         logger.debug(e)
-
     return subscriptions
 
 
@@ -340,7 +331,6 @@ def get_subscription(application_name: str,
         subscription = None
         logger.debug("Subscriptions retrieval failed")
         logger.debug(e)
-
     return subscription
 
 
@@ -348,9 +338,10 @@ def get_access_token(consumer_key: str,
                      consumer_secret: str,
                      token_url: str) -> Optional[str]:
     logger.debug("Get access_token")
-    data = {'grant_type': 'client_credentials'}
 
     try:
+        data = {'grant_type': 'client_credentials'}
+
         response = requests.post(token_url,
                                  data=data,
                                  verify=False,
@@ -377,7 +368,7 @@ def get_all_service_jobs(service_name: str,
     try:
         service = get_service(service_name, api_key)
         service_id = service.id
-        version = get_version(service_id, api_key)
+        version = get_version(service_name, api_key)
         version_id = version.id
         jobs = services_api.get_managed_service_executions(service_id, version_id)
         assert jobs is not None
@@ -385,7 +376,6 @@ def get_all_service_jobs(service_name: str,
         jobs = None
         logger.debug("Get all service jobs failed")
         logger.debug(e)
-
     return jobs
 
 
@@ -393,6 +383,7 @@ def get_service_job(service_name: str,
                     job_id: str,
                     api_key: Dict[str, str]) -> Optional[ServiceExecutionDto]:
     logger.debug("Get service job")
+
     try:
         jobs = get_all_service_jobs(service_name, api_key)
 
@@ -404,7 +395,6 @@ def get_service_job(service_name: str,
         found_job = None
         logger.debug("Get service job failed")
         logger.debug(e)
-
     return found_job
 
 
@@ -414,6 +404,7 @@ def trigger_application_job(service_name: str,
                             access_token: str,
                             api_key: Dict[str, str]) -> Optional[Dict[str, str]]:
     logger.debug("Trigger application execution")
+
     try:
         version = get_version(service_name, api_key)
         service_endpoint = version.gateway_endpoint
@@ -439,30 +430,21 @@ def trigger_application_job(service_name: str,
     return json_response
 
 
-def cancel_service_job(job_id: str, api_key: Dict[str, str]):
-    raise NotImplementedError("This feature is not implemented yet.")
-
-
-def delete_service_job(job_id: str, api_key: Dict[str, str]):
-    raise NotImplementedError("This feature is not implemented yet.")
-
-
 def trigger_service_job(service_name: str,
                         data: Dict[str, list],
                         params: Dict[str, str],
                         api_key: Dict[str, str],
-                        params_ref: Dict[str, str] = None,
-                        data_ref: Dict[str, list] = None,
                         timeout=500,
                         step=1) -> JobDto:
     logger.debug("Trigger service job")
+
     configuration = Configuration(api_key=api_key)
     api_client = ApiClient(configuration=configuration)
     service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
 
     try:
         service = get_service(service_name, api_key)
-        service_definition_id = service.service_definition_id
+        service_definition_id = service.service_definitions[0].id
         create_job_request = CreateJobRequest(service_definition_id=service_definition_id,
                                               input_data=json.dumps(data),
                                               parameters=json.dumps(params),
@@ -481,7 +463,7 @@ def trigger_service_job(service_name: str,
 
 
 def get_service_job_status(job_id: str,
-                           api_key: Dict[str, str]):
+                           api_key: Dict[str, str]) -> Optional[str]:
     logger.debug("Get service job status")
 
     configuration = Configuration(api_key=api_key)
@@ -491,7 +473,7 @@ def get_service_job_status(job_id: str,
     try:
         job = service_jobs_api.get_job(job_id)
         assert job is not None
-        status = job.status
+        status = job["status"]
     except Exception as e:
         status = None
         logger.debug("Get service job status failed")
@@ -499,8 +481,25 @@ def get_service_job_status(job_id: str,
     return status
 
 
-def get_service_job_logs(job_id: str, api_key: Dict[str, str]):
-    raise NotImplementedError("This feature is not implemented yet.")
+def get_service_job_result(job_id: str,
+                           api_key: Dict[str, str]) -> Optional[Dict[str, str]]:
+    logger.debug("Get service job result")
+
+    configuration = Configuration(api_key=api_key)
+    api_client = ApiClient(configuration=configuration)
+    service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
+
+    try:
+        job = service_jobs_api.get_job(job_id)
+        assert job is not None
+        result_string = job["result"]
+        result = json.loads(result_string)
+        logger.debug("Service job result returned")
+    except Exception as e:
+        result = None
+        logger.debug("Get service job status failed")
+        logger.debug(e)
+    return result
 
 
 def get_application_job_info(service_name: str,
@@ -508,9 +507,9 @@ def get_application_job_info(service_name: str,
                              access_token: str,
                              api_key: Dict[str, str]) -> Optional[Dict[str, str]]:
     logger.debug("Get application job info")
+
     try:
-        service_id = get_service(service_name, api_key)
-        version = get_version(service_id, api_key)
+        version = get_version(service_name, api_key)
         service_endpoint = version.gateway_endpoint
         service_endpoint = os.path.join(service_endpoint, job_id)
         headers = {
@@ -532,10 +531,9 @@ def get_application_job_status(service_name: str,
                                access_token: str,
                                api_key: Dict[str, str]) -> Optional[str]:
     logger.debug("Get application job status")
+
     try:
-        service = get_service(service_name, api_key)
-        service_id = service.id
-        version = get_version(service_id, api_key)
+        version = get_version(service_name, api_key)
         service_endpoint = version.gateway_endpoint
         service_endpoint = os.path.join(service_endpoint, job_id)
         headers = {
@@ -558,6 +556,7 @@ def get_application_job_result(service_name: str,
                                access_token: str,
                                api_key: Dict[str, str]) -> Optional[Dict[str, str]]:
     logger.debug("Get application job result")
+
     try:
         version = get_version(service_name, api_key)
         service_endpoint = version.gateway_endpoint

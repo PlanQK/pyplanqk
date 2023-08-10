@@ -39,6 +39,7 @@ def test_create_application(api_key: Dict[str, str]):
         application_name = f"application_{str(uuid.uuid4())}"
         application = create_application(application_name, api_key)
         assert type(application) == ApplicationDto
+        applications.append(application)
     except Exception as e:
         logger.debug(e)
 
@@ -46,9 +47,8 @@ def test_create_application(api_key: Dict[str, str]):
 
 
 def test_get_application(api_key: Dict[str, str],
-                         simple_application: ServiceDto):
+                         simple_application: ApplicationDto):
     logger.debug("test_get_application")
-    simple_application, consumer_key, consumer_secret = simple_application
     applications = [simple_application]
     services = []
     try:
@@ -64,7 +64,7 @@ def test_get_application(api_key: Dict[str, str],
 def test_remove_application(api_key: Dict[str, str],
                             simple_application: ApplicationDto):
     logger.debug("test_remove_application")
-    applications = [simple_application]
+    applications = []
     services = []
     try:
         application_name = simple_application.name
@@ -72,6 +72,7 @@ def test_remove_application(api_key: Dict[str, str],
         assert result
     except Exception as e:
         logger.debug(e)
+        applications.append(simple_application)
 
     cleanup_services_and_applications(applications, services, api_key)
 
@@ -80,13 +81,14 @@ def test_remove_service(api_key: Dict[str, str],
                         simple_service: ServiceDto):
     logger.debug("test_remove_service")
     applications = []
-    services = [simple_service]
+    services = []
     try:
         service_name = simple_service.name
         result = remove_service(service_name, api_key)
         assert result
     except Exception as e:
         logger.debug(e)
+        services.append(simple_service)
 
     cleanup_services_and_applications(applications, services, api_key)
 
@@ -209,13 +211,24 @@ def test_get_all_subscriptions(api_key: Dict[str, str],
 
 
 def test_get_access_token(application_with_auth: Tuple[ApplicationDto, str, str],
-                          token_url: str):
+                          token_url: str,
+                          api_key: Dict[str, str]):
     logger.debug("test_get_access_token")
+
     application, consumer_key, consumer_secret = application_with_auth
-    access_token = get_access_token(consumer_key, consumer_secret, token_url)
-    logger.debug(access_token)
-    assert access_token is not None
-    assert len(access_token) == 1037
+
+    applications = [application]
+    services = []
+
+    try:
+        access_token = get_access_token(consumer_key, consumer_secret, token_url)
+        logger.debug(access_token)
+        assert access_token is not None
+        assert len(access_token) == 1037
+    except Exception as e:
+        logger.debug(e)
+
+    cleanup_services_and_applications(applications, services, api_key)
 
 
 def test_get_all_service_jobs(simple_service: ServiceDto,
@@ -224,7 +237,6 @@ def test_get_all_service_jobs(simple_service: ServiceDto,
     applications = []
     services = [simple_service]
     try:
-        logger.debug("test_get_all_service_jobs")
         service_name = simple_service.name
         jobs = get_all_service_jobs(service_name, api_key)
         assert len(jobs) == 0

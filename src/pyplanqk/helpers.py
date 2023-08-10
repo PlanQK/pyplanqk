@@ -6,8 +6,9 @@ from openapi_client.api_client import ApiClient
 from openapi_client.apis import ServicePlatformServicesApi
 from openapi_client.apis import ServicePlatformJobsApi
 from openapi_client.configuration import Configuration
-from typing import Dict
 from openapi_client.models import *
+
+from typing import Dict
 
 logger = logging.getLogger("pyplanqk")
 
@@ -80,7 +81,7 @@ def wait_for_application_job_to_be_finished(url: str,
 def wait_for_service_job_to_be_finished(job_id: str,
                                         api_key: Dict[str, str],
                                         timeout: int = 500,
-                                        step: int = 1):
+                                        step: int = 1) -> bool:
     logger.debug("Wait for service job to be finished")
 
     configuration = Configuration(api_key=api_key)
