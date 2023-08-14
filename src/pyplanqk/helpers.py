@@ -1,6 +1,6 @@
 import time
-import logging
 import requests
+import logging
 
 from openapi_client.api_client import ApiClient
 from openapi_client.apis import ServicePlatformServicesApi
@@ -10,7 +10,8 @@ from openapi_client.models import *
 
 from typing import Dict
 
-logger = logging.getLogger("pyplanqk")
+
+logger = logging.getLogger(__name__)
 
 
 def wait_for_service_to_be_created(service_id: str,

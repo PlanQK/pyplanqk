@@ -1,19 +1,21 @@
 import uuid
 
-import numpy as np
-
 from pyplanqk.high_level_actions import PyPlanQK
 from pyplanqk.low_level_actions import *
-from conftest import cleanup_services_and_applications
-from typing import Dict
 
+from conftest import cleanup_services_and_applications
 from conftest import get_data, get_params, get_config
 
-logger = logging.getLogger("pyplanqk")
+from typing import Dict
+
+
+logger = logging.getLogger(__name__)
 
 
 def test_service_job(api_key: Dict[str, str]):
+    print()
     logger.debug("test_service_job")
+
     applications = []
     services = []
 
@@ -47,8 +49,7 @@ def test_service_job(api_key: Dict[str, str]):
         predict_params["mode"] = "predict"
 
         for i in range(3):
-            idx = np.random.randint(0, len(train_data["X_test"]))
-            predict_data["x"] = [train_data["X_test"][idx]]
+            predict_data["x"] = [train_data["X_test"][0]]
             result = plnqk.execute_service(service_name,
                                            predict_data,
                                            predict_params)

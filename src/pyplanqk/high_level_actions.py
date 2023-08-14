@@ -1,8 +1,7 @@
 from pyplanqk.low_level_actions import *
-
 from pyplanqk.models import ConfigModel
 
-logger = logging.getLogger("pyplanqk")
+logger = logging.getLogger(__name__)
 
 
 class PyPlanQK:
@@ -40,8 +39,8 @@ class PyPlanQK:
 
     def execute_service(self,
                         service_name: str,
-                        data: Dict[str, list],
-                        params: Dict[str, str]) -> Optional[Dict[str, str]]:
+                        data: Dict[str, Any],
+                        params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
             Executes a service job with the specified parameters and data.
 
@@ -59,7 +58,10 @@ class PyPlanQK:
             service = get_service(service_name, self.api_key)
 
             service_name = service.name
-            job = trigger_service_job(service_name, data, params, self.api_key)
+            job = trigger_service_job(service_name=service_name,
+                                      api_key=self.api_key,
+                                      data=data,
+                                      params=params)
             assert job is not None
 
             job_id = job["id"]
@@ -69,3 +71,24 @@ class PyPlanQK:
             result = None
             logger.debug(e)
         return result
+
+    def create_datapool(self, datapool_name: Optional[str]) -> Optional[Dict[str, str]]:
+        logger.debug("Create datapool")
+        try:
+            url = "https://platform.planqk.de/qc-catalog/data-pools"
+
+            headers = {
+                "Content-Type": "application/json",
+                "X-Auth-Token": self.api_key["apiKey"]
+            }
+
+            data = {
+                "name": datapool_name
+            }
+
+            response = requests.post(url, headers=headers, json=data)
+            datapool = response.json()
+        except Exception as e:
+            datapool = None
+            logger.debug(e)
+        return datapool

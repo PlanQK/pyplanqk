@@ -5,12 +5,13 @@ from pyplanqk.helpers import *
 
 from openapi_client.apis import ServicePlatformApplicationsApi
 
-from typing import Optional, List
-
-logger = logging.getLogger("pyplanqk")
+from typing import Optional, List, Any
 
 
-def create_managed_service(config: Dict[str, str],
+logger = logging.getLogger(__name__)
+
+
+def create_managed_service(config: Dict[str, Any],
                            api_key: Dict[str, str]) -> Optional[ServiceDto]:
     logger.debug("Create managed service")
 
@@ -19,10 +20,9 @@ def create_managed_service(config: Dict[str, str],
     services_api = ServicePlatformServicesApi(api_client=api_client)
 
     try:
-        config_ = dict(**config)
-        config_["user_code"] = open(config_["user_code"], "rb")
-        config_["api_definition"] = open(config_["api_definition"], "rb")
-        service = services_api.create_managed_service(**config_)
+        config["user_code"] = open(config["user_code"], "rb")
+        config["api_definition"] = open(config["api_definition"], "rb")
+        service = services_api.create_managed_service(**config)
         assert service is not None
         logger.debug("Service creation triggered.")
     except Exception as e:
@@ -357,9 +357,9 @@ def get_access_token(consumer_key: str,
     return json_response
 
 
-def get_all_service_jobs(service_name: str,
+def get_all_service_jobs_for_service(service_name: str,
                          api_key: Dict[str, str]) -> Optional[List[ServiceExecutionDto]]:
-    logger.debug("Get all service jobs")
+    logger.debug("Get all service jobs for service")
 
     configuration = Configuration(api_key=api_key)
     api_client = ApiClient(configuration=configuration)
@@ -379,13 +379,30 @@ def get_all_service_jobs(service_name: str,
     return jobs
 
 
+def get_all_service_jobs(api_key: Dict[str, str]) -> Optional[List[ServiceExecutionDto]]:
+    logger.debug("Get all service jobs")
+
+    configuration = Configuration(api_key=api_key)
+    api_client = ApiClient(configuration=configuration)
+    service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
+
+    try:
+        jobs = service_jobs_api.get_jobs()
+        assert jobs is not None
+    except Exception as e:
+        jobs = None
+        logger.debug("Get all service jobs failed")
+        logger.debug(e)
+    return jobs
+
+
 def get_service_job(service_name: str,
                     job_id: str,
                     api_key: Dict[str, str]) -> Optional[ServiceExecutionDto]:
     logger.debug("Get service job")
 
     try:
-        jobs = get_all_service_jobs(service_name, api_key)
+        jobs = get_all_service_jobs_for_service(service_name, api_key)
 
         found_job = None
         for job in jobs:
@@ -431,9 +448,11 @@ def trigger_application_job(service_name: str,
 
 
 def trigger_service_job(service_name: str,
-                        data: Dict[str, list],
-                        params: Dict[str, str],
                         api_key: Dict[str, str],
+                        data: Dict[str, Any] = None,
+                        params: Dict[str, Any] = None,
+                        mode: str = "DATA_UPLOAD",
+                        data_ref: Dict[str, Any] = None,
                         timeout=500,
                         step=1) -> JobDto:
     logger.debug("Trigger service job")
@@ -445,11 +464,23 @@ def trigger_service_job(service_name: str,
     try:
         service = get_service(service_name, api_key)
         service_definition_id = service.service_definitions[0].id
-        create_job_request = CreateJobRequest(service_definition_id=service_definition_id,
-                                              input_data=json.dumps(data),
-                                              parameters=json.dumps(params),
-                                              serviceDefinition=service_definition_id,
-                                              persist_result=True)
+
+        if mode == "DATA_UPLOAD":
+            create_job_request = CreateJobRequest(service_definition_id=service_definition_id,
+                                                  input_data=json.dumps(data),
+                                                  parameters=json.dumps(params),
+                                                  persist_result=True)
+        elif mode == "DATA_POOL":
+
+            data_ref = DataPoolRef(**data_ref)
+
+            create_job_request = CreateJobRequest(service_definition_id=service_definition_id,
+                                                  input_data_ref=data_ref,
+                                                  parameters=json.dumps(params),
+                                                  persist_result=True)
+        else:
+            raise Exception("Invalid mode, allowed modes are: [DATA_UPLOAD, DATA_POOL]")
+
         job = service_jobs_api.create_job(create_job_request=create_job_request)
         job_id = job.id
         result = wait_for_service_job_to_be_finished(job_id, api_key, timeout=timeout, step=step)
@@ -460,6 +491,23 @@ def trigger_service_job(service_name: str,
         logger.debug("Trigger service job failed")
         logger.debug(e)
     return job
+
+
+def remove_service_job(job_id: str, api_key: Dict[str, str]) -> bool:
+    logger.debug("Remove service job")
+
+    configuration = Configuration(api_key=api_key)
+    api_client = ApiClient(configuration=configuration)
+    service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
+
+    try:
+        service_jobs_api.delete_job(job_id)
+        result = True
+    except Exception as e:
+        result = False
+        logger.debug("Remove service job failed")
+        logger.debug(e)
+    return result
 
 
 def get_service_job_status(job_id: str,
@@ -482,7 +530,7 @@ def get_service_job_status(job_id: str,
 
 
 def get_service_job_result(job_id: str,
-                           api_key: Dict[str, str]) -> Optional[Dict[str, str]]:
+                           api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
     logger.debug("Get service job result")
 
     configuration = Configuration(api_key=api_key)
@@ -494,6 +542,7 @@ def get_service_job_result(job_id: str,
         assert job is not None
         result_string = job["result"]
         result = json.loads(result_string)
+        result = result["result"]
         logger.debug("Service job result returned")
     except Exception as e:
         result = None
@@ -505,7 +554,7 @@ def get_service_job_result(job_id: str,
 def get_application_job_info(service_name: str,
                              job_id: str,
                              access_token: str,
-                             api_key: Dict[str, str]) -> Optional[Dict[str, str]]:
+                             api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
     logger.debug("Get application job info")
 
     try:
@@ -554,7 +603,7 @@ def get_application_job_status(service_name: str,
 def get_application_job_result(service_name: str,
                                job_id: str,
                                access_token: str,
-                               api_key: Dict[str, str]) -> Optional[Dict[str, str]]:
+                               api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
     logger.debug("Get application job result")
 
     try:
@@ -574,3 +623,149 @@ def get_application_job_result(service_name: str,
         logger.debug("Get application job result failed")
         logger.debug(e)
     return result
+
+
+def get_data_pools(api_key: str) -> Optional[Dict[str, Any]]:
+    logger.debug("Get data pools")
+
+    try:
+        url = "https://platform.planqk.de/qc-catalog/data-pools"
+
+        headers = {
+            "Content-Type": "application/json",
+            "X-Auth-Token": api_key
+        }
+
+        response = requests.get(url, headers=headers)
+        data_pools = response.json()["content"]
+    except Exception as e:
+        data_pools = None
+        logger.debug("Get data pools failed")
+        logger.debug(e)
+    return data_pools
+
+
+def create_data_pool(data_pool_name: str, api_key: str) -> Optional[Dict[str, Any]]:
+    logger.debug("Create data pool")
+
+    try:
+        url = "https://platform.planqk.de/qc-catalog/data-pools"
+
+        headers = {
+            "Content-Type": "application/json",
+            "X-Auth-Token": api_key
+        }
+
+        data = {
+            "name": data_pool_name
+        }
+
+        response = requests.post(url, headers=headers, json=data)
+        data_pools = response.json()
+    except Exception as e:
+        data_pools = None
+        logger.debug("Create data pool failed")
+        logger.debug(e)
+    return data_pools
+
+
+def get_data_pool(data_pool_name: str, api_key: str) -> Optional[Dict[str, str]]:
+    logger.debug("Get data pool")
+
+    try:
+        data_pools = get_data_pools(api_key)
+        assert data_pools is not None
+
+        found_data_pool = None
+        for data_pool in data_pools:
+            if data_pool_name == data_pool["name"]:
+                found_data_pool = data_pool
+
+        assert found_data_pool is not None
+
+        return found_data_pool
+    except Exception as e:
+        found_data_pool = None
+        logger.debug("Get data pool failed")
+        logger.debug(e)
+    return found_data_pool
+
+
+def remove_data_pool(data_pool_name: str, api_key: str) -> bool:
+    logger.debug("Remove data pool")
+
+    try:
+        headers = {
+            "Content-Type": "application/json",
+            "X-Auth-Token": api_key
+        }
+
+        data_pool = get_data_pool(data_pool_name, api_key)
+        assert data_pool is not None
+
+        data_pool_id = data_pool["id"]
+        url = f"https://platform.planqk.de/qc-catalog/data-pools/{data_pool_id}"
+
+        response = requests.delete(url, headers=headers)
+        assert response.status_code == 204
+        result = True
+    except Exception as e:
+        result = False
+        logger.debug("Remove data pools failed")
+        logger.debug(e)
+    return result
+
+
+def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Optional[Dict[str, str]]:
+    logger.debug("Get data pool file information")
+
+    try:
+        data_pool = get_data_pool(data_pool_name, api_key)
+        data_pool_id = data_pool["id"]
+
+        url = f"https://platform.planqk.de/qc-catalog/data-pools/{data_pool_id}/data-source-descriptors"
+
+        headers = {
+            "Content-Type": "application/json",
+            "X-Auth-Token": api_key
+        }
+
+        response = requests.get(url, headers=headers)
+        response_json = response.json()
+
+        file_infos = dict()
+        for entry in response_json:
+            name = entry["files"][0]["name"]
+            file_infos[name] = dict()
+            file_infos[name]["data_pool_id"] = data_pool_id
+            file_infos[name]["data_source_descriptor_id"] = entry["id"]
+            file_infos[name]["file_id"] = entry["files"][0]["id"]
+    except Exception as e:
+        file_infos = None
+        logger.debug("Get data pool file information failed")
+        logger.debug(e)
+    return file_infos
+
+
+def add_data_to_data_pool(data_pool_name: str, file, api_key: str) -> Optional[Dict[str, str]]:
+    logger.debug("Add data to data pool")
+
+    try:
+        data_pool = get_data_pool(data_pool_name, api_key)
+        data_pool_id = data_pool["id"]
+
+        url = f"https://platform.planqk.de/qc-catalog/data-pools/{data_pool_id}/data-source-descriptors"
+
+        headers = {
+            "X-Auth-Token": api_key
+        }
+
+        files = {"file": file}
+
+        response = requests.post(url, headers=headers, files=files)
+        data_pools = response.json()
+    except Exception as e:
+        data_pools = None
+        logger.debug("Add data to data pool failed")
+        logger.debug(e)
+    return data_pools

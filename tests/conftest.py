@@ -1,33 +1,11 @@
 import pytest
 import uuid
 
-import numpy as np
+from typing import Tuple
 
-from pyplanqk.low_level_actions import *
-from pyplanqk.helpers import *
-from typing import Dict, Tuple, List
+from util import *
 
 from pyplanqk.models import ConfigModel
-
-logger = logging.getLogger("pyplanqk")
-
-
-@pytest.fixture(autouse=True)
-def configure_logger():
-    logger_ = logging.getLogger("pyplanqk")
-
-    # Configure your custom logger as desired, e.g., setting log level, formatter, handlers, etc.
-    logger_.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("[%(levelname)s] %(name)s - %(message)s")
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(formatter)
-    logger_.addHandler(stream_handler)
-
-    # Yielding None here means the fixture will only run once before the tests start.
-    yield None
-
-    # Clean up the logger after all tests have finished (optional).
-    logger_.handlers = []
 
 
 @pytest.fixture(scope="function")
@@ -62,32 +40,26 @@ def train_data() -> Dict[str, list]:
     return get_data()
 
 
-def get_data(num_samples_train=80, num_samples_test=20) -> Dict[str, list]:
-    data = dict()
+@pytest.fixture(scope="function")
+def predict_data() -> Dict[str, Any]:
+    data = get_data()
 
-    X_train = np.random.uniform(-1.0, 1.0, size=(num_samples_train, 2))
-    data["X_train"] = X_train.tolist()
-    data["y_train"] = label_data(X_train).tolist()
+    predict_data_ = dict()
+    predict_data_["model"] = None
+    predict_data_["x"] = [data["X_test"][0]]
 
-    X_test = np.random.uniform(-1.0, 1.0, size=(num_samples_test, 2))
-    data["X_test"] = X_test.tolist()
-    data["y_test"] = label_data(X_test).tolist()
-
-    return data
+    return predict_data_
 
 
 @pytest.fixture(scope="function")
-def train_params() -> Dict[str, str]:
+def train_params() -> Dict[str, Any]:
     return get_params()
 
 
-def get_params(maxiter=30, reps=1):
-    params = dict()
-
-    params["mode"] = "train"
-    params["maxiter"] = maxiter
-    params["reps"] = reps
-
+@pytest.fixture(scope="function")
+def predict_params() -> Dict[str, Any]:
+    params = get_params()
+    params["mode"] = "predict"
     return params
 
 
@@ -100,26 +72,51 @@ def config() -> ConfigModel:
     return config
 
 
-def get_config(name: str,
-               user_code: str,
-               api_definition: str,
-               description: str = "Default description.",
-               milli_cpus: int = 1000,
-               memory_in_meagbytes: int = 4096,
-               runtime: str = "PYTHON_TEMPLATE",
-               gpu_count: int = 0,
-               gpu_accelerator: str = "NONE") -> ConfigModel:
-    config = ConfigModel(name=name,
-                         description=description,
-                         user_code=user_code,
-                         api_definition=api_definition,
-                         milli_cpus=milli_cpus,
-                         memory_in_meagbytes=memory_in_meagbytes,
-                         runtime=runtime,
-                         gpu_count=gpu_count,
-                         gpu_accelerator=gpu_accelerator)
+@pytest.fixture(scope="function")
+def data_pool(api_key: Dict[str, str]) -> Dict[str, Any]:
+    data_pool_name = f"data_pool_{str(uuid.uuid4())}"
+    url = "https://platform.planqk.de/qc-catalog/data-pools"
 
-    return config
+    headers = {
+        "Content-Type": "application/json",
+        "X-Auth-Token": api_key["apiKey"]
+    }
+
+    data = {
+        "name": data_pool_name
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    data_pool = response.json()
+    return data_pool
+
+
+@pytest.fixture(scope="function")
+def data_pool_with_data(api_key: Dict[str, str],
+                        train_data: Dict[str, list],
+                        train_params: Dict[str, list]) -> Dict[str, Any]:
+    data_pool_name = f"data_pool_{str(uuid.uuid4())}"
+    url = "https://platform.planqk.de/qc-catalog/data-pools"
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-Auth-Token": api_key["apiKey"]
+    }
+
+    data = {
+        "name": data_pool_name
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    data_pool = response.json()
+
+    save_data(train_data, train_params)
+
+    file = open("data/data.json", "rb")
+    result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
+    assert result
+
+    return data_pool
 
 
 @pytest.fixture(scope="function")
@@ -134,9 +131,9 @@ def access_token() -> str:
 
 
 @pytest.fixture(scope="function")
-def simple_service(config: Dict[str, str],
+def simple_service(config: ConfigModel,
                    api_key: Dict[str, str]) -> ServiceDto:
-    service = create_managed_service(config, api_key)
+    service = create_managed_service(config.model_dump(), api_key)
     service_id = service.id
     version_id = service.service_definitions[0].id
 
@@ -185,7 +182,7 @@ def full_application(config,
     print("Enter consumer_secret:")
     consumer_secret = input()
 
-    service = create_managed_service(config, api_key)
+    service = create_managed_service(config.model_dump(), api_key)
 
     service_name = service.name
     service_id = service.id
@@ -201,8 +198,8 @@ def full_application(config,
 
 
 @pytest.fixture(scope="function")
-def service_job(data: Dict[str, list],
-                params: Dict[str, str],
+def service_job(data: Dict[str, Any],
+                params: Dict[str, Any],
                 api_key: Dict[str, str]) -> JobDto:
     logger.debug("Trigger service job")
     configuration = Configuration(api_key=api_key)
@@ -216,38 +213,3 @@ def service_job(data: Dict[str, list],
                                           persist_result=True)
     job = service_jobs_api.create_job(create_job_request=create_job_request)
     return job
-
-
-def cleanup_services_and_applications(applications: List[ApplicationDto],
-                                      services: List[ServiceDto],
-                                      api_key: Dict[str, str]):
-    logger.debug("")
-    logger.debug("")
-    logger.debug("cleanup_services_and_applications")
-    for application in applications:
-        application_name = application.name
-        subscriptions = get_all_subscriptions(application_name, api_key)
-
-        for _ in subscriptions:
-            remove_subscription(application_name, api_key)
-
-        remove_application(application_name, api_key)
-        logger.debug(f"remove_application: {application_name}")
-
-    for service in services:
-        service_name = service.name
-        version = get_version(service_name, api_key)
-        version_id = version.id
-        unpublish_service(service_name, api_key)
-        logger.debug(f"unpublish_service: {service_name}, {version_id}")
-        remove_service(service_name, api_key)
-        logger.debug(f"remove_service: {service_name}")
-
-
-def label_data(x):
-    num_samples = x.shape[0]
-    y01 = 1 * (np.sum(x, axis=1) >= 0)
-    y_one_hot = np.zeros((num_samples, 2))
-    for i in range(num_samples):
-        y_one_hot[i, y01[i]] = 1
-    return y_one_hot
