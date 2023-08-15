@@ -27,7 +27,7 @@ level = logging.INFO
 
 default_frmt_str = "%(asctime)s | [%(levelname)s] | %(name)s | %(message)s"
 debug_frmt_str = "%(asctime)s | [%(levelname)s] | %(name)s | %(message)s"
-info_frmt_str = "%(asctime)s | %(message)s"
+info_frmt_str = "%(asctime)s | %(name)s | %(message)s"
 formatter = CustomFormatter(default_frmt_str)
 formatter.set_formatter(logging.DEBUG, logging.Formatter(debug_frmt_str))
 formatter.set_formatter(logging.INFO, logging.Formatter(info_frmt_str))

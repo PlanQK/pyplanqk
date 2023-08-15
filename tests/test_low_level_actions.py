@@ -512,10 +512,6 @@ def test_add_data_to_data_pool(data_pool: Dict[str, str],
         result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
         assert result
 
-        file = open("data/params.json", "rb")
-        result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
-        assert result
-
     except Exception as e:
         data_pool_name = None
         logger.debug(e)

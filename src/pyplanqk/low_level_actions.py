@@ -7,7 +7,6 @@ from openapi_client.apis import ServicePlatformApplicationsApi
 
 from typing import Optional, List, Any
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -20,6 +19,13 @@ def create_managed_service(config: Dict[str, Any],
     services_api = ServicePlatformServicesApi(api_client=api_client)
 
     try:
+        service_name = config["name"]
+        service = get_service(service_name, api_key)
+
+        if service is not None:
+            logger.debug("Service already created.")
+            return service
+
         config["user_code"] = open(config["user_code"], "rb")
         config["api_definition"] = open(config["api_definition"], "rb")
         service = services_api.create_managed_service(**config)
@@ -358,7 +364,7 @@ def get_access_token(consumer_key: str,
 
 
 def get_all_service_jobs_for_service(service_name: str,
-                         api_key: Dict[str, str]) -> Optional[List[ServiceExecutionDto]]:
+                                     api_key: Dict[str, str]) -> Optional[List[ServiceExecutionDto]]:
     logger.debug("Get all service jobs for service")
 
     configuration = Configuration(api_key=api_key)
@@ -747,7 +753,7 @@ def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Optiona
     return file_infos
 
 
-def add_data_to_data_pool(data_pool_name: str, file, api_key: str) -> Optional[Dict[str, str]]:
+def add_data_to_data_pool(data_pool_name: str, file, api_key: str) -> bool:
     logger.debug("Add data to data pool")
 
     try:
@@ -763,9 +769,9 @@ def add_data_to_data_pool(data_pool_name: str, file, api_key: str) -> Optional[D
         files = {"file": file}
 
         response = requests.post(url, headers=headers, files=files)
-        data_pools = response.json()
+        result = response.status_code in [200, 201, 204]
     except Exception as e:
-        data_pools = None
+        result = False
         logger.debug("Add data to data pool failed")
         logger.debug(e)
-    return data_pools
+    return result

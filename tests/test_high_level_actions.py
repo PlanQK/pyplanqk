@@ -121,14 +121,20 @@ def test_execute_service_predict(config: ServiceConfig,
     cleanup_services_and_applications(applications, services, api_key)
 
 
-def test_create_datapool(api_key: Dict[str, str]):
+def test_create_data_pool(api_key: Dict[str, str]):
     print()
     logger.debug("test_create_datapool")
 
     try:
+        file = open("data/data.json", "rb")
+
         plnqk = PyPlanQK(api_key["apiKey"])
-        datapool_name = f"data_pool_{str(uuid.uuid4())}"
-        datapool = plnqk.create_datapool(datapool_name)
-        assert datapool is not None
+        data_pool_name = f"data_pool_{str(uuid.uuid4())}"
+        data_pool = plnqk.create_data_pool(data_pool_name, file)
+        assert data_pool is not None
     except Exception as e:
+        data_pool_name = None
         logger.debug(e)
+
+    if data_pool_name is not None:
+        remove_data_pool(data_pool_name, api_key["apiKey"])
