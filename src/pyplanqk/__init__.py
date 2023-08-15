@@ -1,6 +1,6 @@
 import logging
 
-from pyplanqk.high_level_actions import *
+from pyplanqk.high_level_actions import PyPlanQK
 from pyplanqk.models import *
 
 
@@ -23,7 +23,7 @@ class CustomFormatter(logging.Formatter):
 
 
 name = "pyplanqk"
-level = logging.INFO
+level = logging.DEBUG
 
 default_frmt_str = "%(asctime)s | [%(levelname)s] | %(name)s | %(message)s"
 debug_frmt_str = "%(asctime)s | [%(levelname)s] | %(name)s | %(message)s"

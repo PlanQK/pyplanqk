@@ -105,15 +105,15 @@ def test_execute_service_predict(config: ServiceConfig,
 
         service_name = service.name
         result_json = plnqk.execute_service(service_name,
-                                            train_data,
-                                            train_params)
+                                            data=train_data,
+                                            params=train_params)
         assert result_json is not None
 
         predict_data["model"] = result_json["model"]
 
         result = plnqk.execute_service(service_name,
-                                       predict_data,
-                                       predict_params)
+                                       data=predict_data,
+                                       params=predict_params)
         assert result is not None
     except Exception as e:
         logger.debug(e)
@@ -130,8 +130,8 @@ def test_create_data_pool(api_key: Dict[str, str]):
 
         plnqk = PyPlanQK(api_key["apiKey"])
         data_pool_name = f"data_pool_{str(uuid.uuid4())}"
-        data_pool = plnqk.create_data_pool(data_pool_name, file)
-        assert data_pool is not None
+        file_info = plnqk.create_data_pool(data_pool_name, file)
+        assert file_info is not None
     except Exception as e:
         data_pool_name = None
         logger.debug(e)

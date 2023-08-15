@@ -19,13 +19,6 @@ def create_managed_service(config: Dict[str, Any],
     services_api = ServicePlatformServicesApi(api_client=api_client)
 
     try:
-        service_name = config["name"]
-        service = get_service(service_name, api_key)
-
-        if service is not None:
-            logger.debug("Service already created.")
-            return service
-
         config["user_code"] = open(config["user_code"], "rb")
         config["api_definition"] = open(config["api_definition"], "rb")
         service = services_api.create_managed_service(**config)
@@ -274,10 +267,9 @@ def get_service(service_name: str,
             if service_name == service["name"]:
                 found_service = service
 
-        assert found_service is not None
-
-        service_id = found_service.id
-        found_service = services_api.get_service(service_id)
+        if found_service is not None:
+            service_id = found_service.id
+            found_service = services_api.get_service(service_id)
     except Exception as e:
         found_service = None
         logger.debug("Service retrieval failed")
@@ -722,7 +714,7 @@ def remove_data_pool(data_pool_name: str, api_key: str) -> bool:
     return result
 
 
-def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Optional[Dict[str, str]]:
+def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Optional[Dict[str, Any]]:
     logger.debug("Get data pool file information")
 
     try:

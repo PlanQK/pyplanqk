@@ -10,10 +10,17 @@ class PyPlanQK:
         self.api_key = {"apiKey": api_key}
         self.token_url = "https://gateway.platform.planqk.de/token"
 
-    def create_service(self, config: ServiceConfig) -> Optional[ServiceDto]:
+    def create_service(self, config: Dict[str, Any]) -> Optional[ServiceDto]:
         logger.info("Create service...")
         try:
-            service = create_managed_service(config.model_dump(), self.api_key)
+            service_name = config["name"]
+            service = get_service(service_name, self.api_key)
+
+            if service is not None:
+                logger.info("Service already created.")
+                return service
+
+            service = create_managed_service(config, self.api_key)
             assert service is not None
 
             service_id = service.id
@@ -31,17 +38,26 @@ class PyPlanQK:
 
     def execute_service(self,
                         service_name: str,
-                        data: Dict[str, Any],
-                        params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+                        params: Dict[str, Any],
+                        data: Dict[str, Any] = None,
+                        data_ref: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
         logger.info("Execute service...")
         try:
             service = get_service(service_name, self.api_key)
 
             service_name = service.name
-            job = trigger_service_job(service_name=service_name,
-                                      api_key=self.api_key,
-                                      data=data,
-                                      params=params)
+            if data_ref is not None:
+                job = trigger_service_job(service_name=service_name,
+                                          api_key=self.api_key,
+                                          mode="DATA_POOL",
+                                          data_ref=data_ref,
+                                          params=params)
+            else:
+                job = trigger_service_job(service_name=service_name,
+                                          api_key=self.api_key,
+                                          mode="DATA_UPLOAD",
+                                          data=data,
+                                          params=params)
             assert job is not None
 
             job_id = job["id"]
@@ -53,7 +69,7 @@ class PyPlanQK:
             logger.info(e)
         return result
 
-    def create_data_pool(self, data_pool_name: Optional[str], file) -> Optional[Dict[str, str]]:
+    def create_data_pool(self, data_pool_name: Optional[str], file) -> Optional[Dict[str, Any]]:
         logger.info("Create data pool...")
         try:
             url = "https://platform.planqk.de/qc-catalog/data-pools"
@@ -75,7 +91,13 @@ class PyPlanQK:
             result = add_data_to_data_pool(data_pool_name, file, self.api_key["apiKey"])
             assert result
 
+            file_infos = get_data_pool_file_information(data_pool_name, self.api_key["apiKey"])
+            assert file_infos is not None
+            file_name = file.name.split("/")[-1]
+            file_info = file_infos[file_name]
+            return file_info
+
         except Exception as e:
-            data_pool = None
+            file_info = None
             logger.info(e)
-        return data_pool
+        return file_info
