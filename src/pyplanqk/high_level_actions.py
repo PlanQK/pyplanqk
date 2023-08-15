@@ -1,7 +1,7 @@
 from pyplanqk.low_level_actions import *
 from pyplanqk.models import ServiceConfig
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pyplanqk")
 
 
 class PyPlanQK:
