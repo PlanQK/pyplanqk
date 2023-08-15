@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class ConfigModel(BaseModel):
+class ServiceConfig(BaseModel):
     name: str
     user_code: str
     api_definition: str

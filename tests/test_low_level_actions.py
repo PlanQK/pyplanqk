@@ -9,7 +9,7 @@ from openapi_client.models import *
 logger = logging.getLogger(__name__)
 
 
-def test_create_managed_service(config: ConfigModel,
+def test_create_managed_service(config: ServiceConfig,
                                 api_key: Dict[str, str]):
     print()
     logger.debug("test_create_managed_service")
@@ -83,9 +83,12 @@ def test_remove_application(api_key: Dict[str, str],
 
 
 def test_remove_service(api_key: Dict[str, str],
-                        simple_service: ServiceDto):
+                        service_info: Tuple[ServiceDto, ServiceConfig]):
     print()
     logger.debug("test_remove_service")
+
+    simple_service, config = service_info
+
     applications = []
     services = []
     try:
@@ -100,9 +103,12 @@ def test_remove_service(api_key: Dict[str, str],
 
 
 def test_get_services(api_key: Dict[str, str],
-                      simple_service: ServiceDto):
+                      service_info: Tuple[ServiceDto, ServiceConfig]):
     print()
     logger.debug("test_get_services")
+
+    simple_service, config = service_info
+
     applications = []
     services = [simple_service]
     try:
@@ -116,9 +122,12 @@ def test_get_services(api_key: Dict[str, str],
 
 
 def test_get_service(api_key: Dict[str, str],
-                     simple_service: ServiceDto):
+                     service_info: Tuple[ServiceDto, ServiceConfig]):
     print()
     logger.debug("test_get_service")
+
+    simple_service, config = service_info
+
     applications = []
     services = [simple_service]
     try:
@@ -132,9 +141,12 @@ def test_get_service(api_key: Dict[str, str],
 
 
 def test_get_version(api_key: Dict[str, str],
-                     simple_service: ServiceDto):
+                     service_info: Tuple[ServiceDto, ServiceConfig]):
     print()
     logger.debug("test_get_version")
+
+    simple_service, config = service_info
+
     applications = []
     services = [simple_service]
     try:
@@ -150,9 +162,12 @@ def test_get_version(api_key: Dict[str, str],
 
 
 def test_publish_service_internally(api_key: Dict[str, str],
-                                    simple_service: ServiceDto):
+                                    service_info: Tuple[ServiceDto, ServiceConfig]):
     print()
     logger.debug("test_publish_service_internally")
+
+    simple_service, config = service_info
+
     applications = []
     services = [simple_service]
     try:
@@ -244,10 +259,13 @@ def test_get_access_token(application_with_auth: Tuple[ApplicationDto, str, str]
     cleanup_services_and_applications(applications, services, api_key)
 
 
-def test_get_all_service_jobs_for_service(simple_service: ServiceDto,
+def test_get_all_service_jobs_for_service(service_info: Tuple[ServiceDto, ServiceConfig],
                                           api_key: Dict[str, str]):
     print()
     logger.debug("test_get_all_service_jobs_for_service")
+
+    simple_service, config = service_info
+
     applications = []
     services = [simple_service]
     try:
@@ -372,7 +390,7 @@ def test_trigger_application_job_predict(full_application: Tuple[ApplicationDto,
     cleanup_services_and_applications(applications, services, api_key)
 
 
-def test_trigger_service_job_data_upload_train(simple_service: ServiceDto,
+def test_trigger_service_job_data_upload_train(service_info: Tuple[ServiceDto, ServiceConfig],
                                                train_data: Dict[str, Any],
                                                train_params: Dict[str, Any],
                                                api_key: Dict[str, str],
@@ -380,6 +398,8 @@ def test_trigger_service_job_data_upload_train(simple_service: ServiceDto,
                                                step: int):
     print()
     logger.debug("test_trigger_service_job_data_upload_train")
+
+    simple_service, config = service_info
 
     applications = []
     services = [simple_service]
@@ -403,12 +423,14 @@ def test_trigger_service_job_data_upload_train(simple_service: ServiceDto,
 
 def test_trigger_service_job_data_pool_train(data_pool_with_data: Dict[str, Any],
                                              train_params: Dict[str, Any],
-                                             simple_service: ServiceDto,
+                                             service_info: Tuple[ServiceDto, ServiceConfig],
                                              api_key: Dict[str, str],
                                              timeout: int,
                                              step: int):
     print()
     logger.debug("test_trigger_service_job_data_pool_train")
+
+    simple_service, config = service_info
 
     applications = []
     services = [simple_service]

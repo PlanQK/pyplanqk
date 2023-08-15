@@ -5,7 +5,7 @@ from typing import Tuple
 
 from util import *
 
-from pyplanqk.models import ConfigModel
+from pyplanqk.models import ServiceConfig
 
 
 @pytest.fixture(scope="function")
@@ -64,7 +64,7 @@ def predict_params() -> Dict[str, Any]:
 
 
 @pytest.fixture(scope="function")
-def config() -> ConfigModel:
+def config() -> ServiceConfig:
     config = get_config(name=f"service_{str(uuid.uuid4())}",
                         description="Service for unit testing.",
                         user_code="data/template.zip",
@@ -131,20 +131,22 @@ def access_token() -> str:
 
 
 @pytest.fixture(scope="function")
-def simple_service(config: ConfigModel,
-                   api_key: Dict[str, str]) -> ServiceDto:
+def service_info(config: ServiceConfig,
+                 api_key: Dict[str, str]) -> Tuple[ServiceDto, ServiceConfig]:
     service = create_managed_service(config.model_dump(), api_key)
     service_id = service.id
     version_id = service.service_definitions[0].id
 
     wait_for_service_to_be_created(service_id, version_id, api_key, timeout=500, step=5)
 
-    return service
+    return service, config
 
 
 @pytest.fixture(scope="function")
-def internally_published_service(simple_service: ServiceDto,
+def internally_published_service(service_info: Tuple[ServiceDto, ServiceConfig],
                                  api_key: Dict[str, str]) -> ServiceDto:
+    simple_service, config = service_info
+
     service_name = simple_service.name
 
     publish_service_internally(service_name, api_key)

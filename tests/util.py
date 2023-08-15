@@ -1,7 +1,7 @@
 import numpy as np
 
 from pyplanqk.low_level_actions import *
-from pyplanqk.models import ConfigModel
+from pyplanqk.models import ServiceConfig
 
 from typing import List, Any
 
@@ -68,16 +68,16 @@ def get_config(name: str,
                memory_in_meagbytes: int = 4096,
                runtime: str = "PYTHON_TEMPLATE",
                gpu_count: int = 0,
-               gpu_accelerator: str = "NONE") -> ConfigModel:
-    config = ConfigModel(name=name,
-                         description=description,
-                         user_code=user_code,
-                         api_definition=api_definition,
-                         milli_cpus=milli_cpus,
-                         memory_in_meagbytes=memory_in_meagbytes,
-                         runtime=runtime,
-                         gpu_count=gpu_count,
-                         gpu_accelerator=gpu_accelerator)
+               gpu_accelerator: str = "NONE") -> ServiceConfig:
+    config = ServiceConfig(name=name,
+                           description=description,
+                           user_code=user_code,
+                           api_definition=api_definition,
+                           milli_cpus=milli_cpus,
+                           memory_in_meagbytes=memory_in_meagbytes,
+                           runtime=runtime,
+                           gpu_count=gpu_count,
+                           gpu_accelerator=gpu_accelerator)
 
     return config
 

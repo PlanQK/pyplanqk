@@ -1,7 +1,6 @@
 import uuid
-
-from pyplanqk.high_level_actions import PyPlanQK
-from pyplanqk.low_level_actions import *
+import logging
+import pyplanqk
 
 from conftest import cleanup_services_and_applications
 from conftest import get_data, get_params, get_config
@@ -28,7 +27,7 @@ def test_service_job(api_key: Dict[str, str]):
                             user_code="data/template.zip",
                             api_definition="data/openapi-spec.yml")
 
-        plnqk = PyPlanQK(api_key["apiKey"])
+        plnqk = pyplanqk.PyPlanQK(api_key["apiKey"])
         service = plnqk.create_service(config)
         assert service is not None
         services.append(service)
