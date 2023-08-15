@@ -23,7 +23,7 @@ class PyPlanQK:
     def create_service(self, config: ServiceConfig) -> Optional[ServiceDto]:
         logger.info("Create service...")
         try:
-            service_name = config.name
+            service_name = config["name"]
             service = get_service(service_name, self.api_key)
 
             if service is not None:

@@ -10,7 +10,9 @@ from setuptools import setup
 
 if __name__ == "__main__":
     try:
-        setup(use_scm_version={"version_scheme": "no-guess-dev"})
+        f = open("requirements.txt", "r")
+        install_requires = list(f.read().splitlines())
+        setup(use_scm_version={"version_scheme": "no-guess-dev"}, install_requires=install_requires)
     except:  # noqa
         print(
             "\n\nAn error occurred while building the project, "
