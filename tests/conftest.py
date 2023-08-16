@@ -5,8 +5,6 @@ from typing import Tuple
 
 from util import *
 
-from pyplanqk.models import ServiceConfig
-
 
 @pytest.fixture(scope="function")
 def api_key() -> Dict[str, str]:
@@ -64,11 +62,19 @@ def predict_params() -> Dict[str, Any]:
 
 
 @pytest.fixture(scope="function")
-def config() -> ServiceConfig:
-    config = get_config(name=f"service_{str(uuid.uuid4())}",
-                        description="Service for unit testing.",
-                        user_code="data/template.zip",
-                        api_definition="data/openapi-spec.yml")
+def config() -> Dict[str, Any]:
+
+    config = Dict()
+    config["name"] = f"service_{str(uuid.uuid4())}"
+    config["user_code"] = open("data/template.zip", "rb")
+    config["api_definition"] = open("data/openapi-spec.yml", "rb")
+    config["description"] = "Service for unit testing."
+    config["milli_cpus"] = 1000
+    config["memory_in_megabytes"] = 4096
+    config["runtime"] = "PYTHON_TEMPLATE"
+    config["gpu_count"] = 0
+    config["gpu_accelerator"] = "NONE"
+
     return config
 
 
@@ -131,9 +137,9 @@ def access_token() -> str:
 
 
 @pytest.fixture(scope="function")
-def service_info(config: ServiceConfig,
-                 api_key: Dict[str, str]) -> Tuple[ServiceDto, ServiceConfig]:
-    service = create_managed_service(config.model_dump(), api_key)
+def service_info(config: Dict[str, Any],
+                 api_key: Dict[str, str]) -> Tuple[ServiceDto, Dict[str, Any]]:
+    service = create_managed_service(config, api_key)
     service_id = service.id
     version_id = service.service_definitions[0].id
 
@@ -143,7 +149,7 @@ def service_info(config: ServiceConfig,
 
 
 @pytest.fixture(scope="function")
-def internally_published_service(service_info: Tuple[ServiceDto, ServiceConfig],
+def internally_published_service(service_info: Tuple[ServiceDto, Dict[str, Any]],
                                  api_key: Dict[str, str]) -> ServiceDto:
     simple_service, config = service_info
 
@@ -174,7 +180,7 @@ def application_with_auth(api_key: Dict[str, str]) -> Tuple[ApplicationDto, str,
 
 
 @pytest.fixture(scope="function")
-def full_application(config,
+def full_application(config: Dict[str, Any],
                      api_key: Dict[str, str]) -> Tuple[ApplicationDto, ServiceDto, str, str]:
     application_name = f"application_{str(uuid.uuid4())}"
     application = create_application(application_name, api_key)
@@ -184,7 +190,7 @@ def full_application(config,
     print("Enter consumer_secret:")
     consumer_secret = input()
 
-    service = create_managed_service(config.model_dump(), api_key)
+    service = create_managed_service(config, api_key)
 
     service_name = service.name
     service_id = service.id

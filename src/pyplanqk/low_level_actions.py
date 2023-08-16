@@ -19,8 +19,6 @@ def create_managed_service(config: Dict[str, Any],
     services_api = ServicePlatformServicesApi(api_client=api_client)
 
     try:
-        config["user_code"] = open(config["user_code"], "rb")
-        config["api_definition"] = open(config["api_definition"], "rb")
         service = services_api.create_managed_service(**config)
         assert service is not None
         logger.debug("Service creation triggered.")

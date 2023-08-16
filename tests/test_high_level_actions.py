@@ -2,7 +2,6 @@ import uuid
 
 from pyplanqk.high_level_actions import PyPlanQK
 from pyplanqk.low_level_actions import *
-from pyplanqk.models import ServiceConfig
 
 from conftest import cleanup_services_and_applications
 
@@ -11,7 +10,7 @@ from typing import Dict, Tuple
 logger = logging.getLogger(__name__)
 
 
-def test_create_service(config: ServiceConfig,
+def test_create_service(config: Dict[str, Any],
                         api_key: Dict[str, str]):
     print()
     logger.debug("test_create_service")
@@ -29,7 +28,7 @@ def test_create_service(config: ServiceConfig,
     cleanup_services_and_applications(applications, services, api_key)
 
 
-def test_create_already_created_service(service_info: Tuple[ServiceDto, ServiceConfig],
+def test_create_already_created_service(service_info: Tuple[ServiceDto, Dict[str, Any]],
                                         api_key: Dict[str, str]):
     print()
     logger.debug("test_create_already_created_service")
@@ -43,7 +42,7 @@ def test_create_already_created_service(service_info: Tuple[ServiceDto, ServiceC
         plnqk = PyPlanQK(api_key["apiKey"])
         service = plnqk.create_service(config)
         assert service is not None
-        assert service.name == config.name
+        assert service.name == config["name"]
         services.append(service)
     except Exception as e:
         logger.debug(e)
@@ -51,7 +50,7 @@ def test_create_already_created_service(service_info: Tuple[ServiceDto, ServiceC
     cleanup_services_and_applications(applications, services, api_key)
 
 
-def test_execute_service_train(config: ServiceConfig,
+def test_execute_service_train(config: Dict[str, Any],
                                api_key: Dict[str, str],
                                train_data: Dict[str, Any],
                                train_params: Dict[str, Any]):
@@ -86,7 +85,7 @@ def test_execute_service_train(config: ServiceConfig,
     cleanup_services_and_applications(applications, services, api_key)
 
 
-def test_execute_service_predict(config: ServiceConfig,
+def test_execute_service_predict(config: Dict[str, Any],
                                  api_key: Dict[str, str],
                                  train_data: Dict[str, Any],
                                  train_params: Dict[str, Any],

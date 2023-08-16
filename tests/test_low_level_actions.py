@@ -9,7 +9,7 @@ from openapi_client.models import *
 logger = logging.getLogger(__name__)
 
 
-def test_create_managed_service(config: ServiceConfig,
+def test_create_managed_service(config: Dict[str, Any],
                                 api_key: Dict[str, str]):
     print()
     logger.debug("test_create_managed_service")
@@ -17,7 +17,7 @@ def test_create_managed_service(config: ServiceConfig,
     services = []
 
     try:
-        service = create_managed_service(config.model_dump(), api_key)
+        service = create_managed_service(config, api_key)
         assert service is not None
         services.append(service)
         assert service is not None
@@ -83,7 +83,7 @@ def test_remove_application(api_key: Dict[str, str],
 
 
 def test_remove_service(api_key: Dict[str, str],
-                        service_info: Tuple[ServiceDto, ServiceConfig]):
+                        service_info: Tuple[ServiceDto, Dict[str, Any]]):
     print()
     logger.debug("test_remove_service")
 
@@ -103,7 +103,7 @@ def test_remove_service(api_key: Dict[str, str],
 
 
 def test_get_services(api_key: Dict[str, str],
-                      service_info: Tuple[ServiceDto, ServiceConfig]):
+                      service_info: Tuple[ServiceDto, Dict[str, Any]]):
     print()
     logger.debug("test_get_services")
 
@@ -122,7 +122,7 @@ def test_get_services(api_key: Dict[str, str],
 
 
 def test_get_service(api_key: Dict[str, str],
-                     service_info: Tuple[ServiceDto, ServiceConfig]):
+                     service_info: Tuple[ServiceDto, Dict[str, Any]]):
     print()
     logger.debug("test_get_service")
 
@@ -141,7 +141,7 @@ def test_get_service(api_key: Dict[str, str],
 
 
 def test_get_version(api_key: Dict[str, str],
-                     service_info: Tuple[ServiceDto, ServiceConfig]):
+                     service_info: Tuple[ServiceDto, Dict[str, Any]]):
     print()
     logger.debug("test_get_version")
 
@@ -162,7 +162,7 @@ def test_get_version(api_key: Dict[str, str],
 
 
 def test_publish_service_internally(api_key: Dict[str, str],
-                                    service_info: Tuple[ServiceDto, ServiceConfig]):
+                                    service_info: Tuple[ServiceDto, Dict[str, Any]]):
     print()
     logger.debug("test_publish_service_internally")
 
@@ -172,13 +172,9 @@ def test_publish_service_internally(api_key: Dict[str, str],
     services = [simple_service]
     try:
         service_name = simple_service.name
-        service = get_service(service_name, api_key, lifecycle="CREATED")
-        service_id = service.id
-        version = get_version(service_id, api_key)
-        version_id = version.id
-        application = publish_service_internally(service_id, version_id, api_key)
+        application = publish_service_internally(service_name, api_key)
         assert application is not None
-        unpublish_service(service_id, version_id, api_key)
+        unpublish_service(service_name, api_key)
     except Exception as e:
         logger.debug(e)
 
@@ -259,7 +255,7 @@ def test_get_access_token(application_with_auth: Tuple[ApplicationDto, str, str]
     cleanup_services_and_applications(applications, services, api_key)
 
 
-def test_get_all_service_jobs_for_service(service_info: Tuple[ServiceDto, ServiceConfig],
+def test_get_all_service_jobs_for_service(service_info: Tuple[ServiceDto, Dict[str, Any]],
                                           api_key: Dict[str, str]):
     print()
     logger.debug("test_get_all_service_jobs_for_service")
@@ -390,7 +386,7 @@ def test_trigger_application_job_predict(full_application: Tuple[ApplicationDto,
     cleanup_services_and_applications(applications, services, api_key)
 
 
-def test_trigger_service_job_data_upload_train(service_info: Tuple[ServiceDto, ServiceConfig],
+def test_trigger_service_job_data_upload_train(service_info: Tuple[ServiceDto, Dict[str, Any]],
                                                train_data: Dict[str, Any],
                                                train_params: Dict[str, Any],
                                                api_key: Dict[str, str],
@@ -423,7 +419,7 @@ def test_trigger_service_job_data_upload_train(service_info: Tuple[ServiceDto, S
 
 def test_trigger_service_job_data_pool_train(data_pool_with_data: Dict[str, Any],
                                              train_params: Dict[str, Any],
-                                             service_info: Tuple[ServiceDto, ServiceConfig],
+                                             service_info: Tuple[ServiceDto, Dict[str, Any]],
                                              api_key: Dict[str, str],
                                              timeout: int,
                                              step: int):

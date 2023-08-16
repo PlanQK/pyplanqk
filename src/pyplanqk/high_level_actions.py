@@ -1,5 +1,4 @@
 from pyplanqk.low_level_actions import *
-from pyplanqk.models import ServiceConfig
 
 logger = logging.getLogger("pyplanqk")
 
