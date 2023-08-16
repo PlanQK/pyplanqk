@@ -10,13 +10,13 @@ class PyPlanQK:
         self.token_url = "https://gateway.platform.planqk.de/token"
 
     def create_service(self, config: Dict[str, Any]) -> Optional[ServiceDto]:
-        logger.info("Create service...")
         try:
             service_name = config["name"]
+            logger.info(f"Create service: {service_name}")
             service = get_service(service_name, self.api_key)
 
             if service is not None:
-                logger.info("Service already created.")
+                logger.info(f"Service {service_name} already created.")
                 return service
 
             service = create_managed_service(config, self.api_key)
@@ -28,10 +28,14 @@ class PyPlanQK:
             version_id = version.id
             result = wait_for_service_to_be_created(service_id, version_id, self.api_key, timeout=500, step=5)
             service = get_service(service_name, self.api_key)
-            logger.info("Service created.")
+            logger.info(f"Service {service_name} created.")
             assert service
         except Exception as e:
             service = None
+            if service_name is not None:
+                logger.info(f"Creation of service {service_name} failed.")
+            else:
+                logger.info(f"Creation of service failed.")
             logger.info(e)
         return service
 
