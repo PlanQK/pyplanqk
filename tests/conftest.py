@@ -64,7 +64,7 @@ def predict_params() -> Dict[str, Any]:
 @pytest.fixture(scope="function")
 def config() -> Dict[str, Any]:
 
-    config = Dict()
+    config = dict()
     config["name"] = f"service_{str(uuid.uuid4())}"
     config["user_code"] = open("data/template.zip", "rb")
     config["api_definition"] = open("data/openapi-spec.yml", "rb")

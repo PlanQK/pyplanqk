@@ -20,12 +20,11 @@ def create_managed_service(config: Dict[str, Any],
 
     try:
         service = services_api.create_managed_service(**config)
-        assert service is not None
         logger.debug("Service creation triggered.")
     except Exception as e:
-        service = None
         logger.debug("Service creation failed.")
         logger.debug(e)
+        raise
     return service
 
 
