@@ -22,13 +22,13 @@ def test_create_service(config: Dict[str, Any],
         service = plnqk.create_service(config)
         assert service is not None
         services.append(service)
+        cleanup_services_and_applications(applications, services, api_key)
     except Exception as e:
         logger.debug(e)
+        assert False
 
-    cleanup_services_and_applications(applications, services, api_key)
 
-
-def test_create_already_created_service(service_info: Tuple[ServiceDto, Dict[str, Any]],
+def test_create_already_created_service(service_info: Tuple[Dict[str, Any], Dict[str, Any]],
                                         api_key: Dict[str, str]):
     print()
     logger.debug("test_create_already_created_service")
@@ -42,18 +42,18 @@ def test_create_already_created_service(service_info: Tuple[ServiceDto, Dict[str
         plnqk = PyPlanQK(api_key["apiKey"])
         service = plnqk.create_service(config)
         assert service is not None
-        assert service.name == config["name"]
+        assert service["name"] == config["name"]
         services.append(service)
+        cleanup_services_and_applications(applications, services, api_key)
     except Exception as e:
         logger.debug(e)
+        assert False
 
-    cleanup_services_and_applications(applications, services, api_key)
 
-
-def test_execute_service_train(config: Dict[str, Any],
-                               api_key: Dict[str, str],
-                               train_data: Dict[str, Any],
-                               train_params: Dict[str, Any]):
+def test_execute_service_train_data_upload(config: Dict[str, Any],
+                                           api_key: Dict[str, str],
+                                           train_data: Dict[str, Any],
+                                           train_params: Dict[str, Any]):
     print()
     logger.debug("test_execute_service_train")
 
@@ -74,15 +74,52 @@ def test_execute_service_train(config: Dict[str, Any],
         json.dump(train_params, f)
         f.close()
 
-        service_name = service.name
+        service_name = service["name"]
         result = plnqk.execute_service(service_name,
-                                       train_data,
-                                       train_params)
-        assert result
+                                       data=train_data,
+                                       params=train_params)
+        assert result is not None
+        cleanup_services_and_applications(applications, services, api_key)
     except Exception as e:
         logger.debug(e)
+        assert False
 
-    cleanup_services_and_applications(applications, services, api_key)
+
+def test_execute_service_train_data_pool(data_pool_with_data: Dict[str, Any],
+                                         config: Dict[str, Any],
+                                         api_key: Dict[str, str],
+                                         train_data: Dict[str, Any],
+                                         train_params: Dict[str, Any]):
+    print()
+    logger.debug("test_execute_service_train")
+
+    applications = []
+    services = []
+
+    try:
+        plnqk = PyPlanQK(api_key["apiKey"])
+        service = plnqk.create_service(config)
+        assert service is not None
+        services.append(service)
+
+        f = open("data/params.json", "w")
+        json.dump(train_params, f)
+        f.close()
+
+        service_name = service["name"]
+        data_pool_name = data_pool_with_data["name"]
+        file_infos = get_data_pool_file_information(data_pool_name, api_key["apiKey"])
+
+        train_data = file_infos["data.json"]
+
+        result = plnqk.execute_service(service_name,
+                                       data_ref=train_data,
+                                       params=train_params)
+        assert result is not None
+        cleanup_services_and_applications(applications, services, api_key)
+    except Exception as e:
+        logger.debug(e)
+        assert False
 
 
 def test_execute_service_predict(config: Dict[str, Any],
@@ -102,7 +139,7 @@ def test_execute_service_predict(config: Dict[str, Any],
         assert service is not None
         services.append(service)
 
-        service_name = service.name
+        service_name = service["name"]
         result_json = plnqk.execute_service(service_name,
                                             data=train_data,
                                             params=train_params)
@@ -114,10 +151,11 @@ def test_execute_service_predict(config: Dict[str, Any],
                                        data=predict_data,
                                        params=predict_params)
         assert result is not None
+        cleanup_services_and_applications(applications, services, api_key)
+        assert True
     except Exception as e:
         logger.debug(e)
-
-    cleanup_services_and_applications(applications, services, api_key)
+        assert False
 
 
 def test_create_data_pool(api_key: Dict[str, str]):
@@ -131,9 +169,10 @@ def test_create_data_pool(api_key: Dict[str, str]):
         data_pool_name = f"data_pool_{str(uuid.uuid4())}"
         file_info = plnqk.create_data_pool(data_pool_name, file)
         assert file_info is not None
-    except Exception as e:
-        data_pool_name = None
-        logger.debug(e)
 
-    if data_pool_name is not None:
-        remove_data_pool(data_pool_name, api_key["apiKey"])
+        if data_pool_name is not None:
+            remove_data_pool(data_pool_name, api_key["apiKey"])
+        assert True
+    except Exception as e:
+        logger.debug(e)
+        assert False

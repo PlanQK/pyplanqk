@@ -29,13 +29,12 @@ def test_service_job_from_data_upload(config: Dict[str, Any], api_key: Dict[str,
         assert service is not None
         services.append(service)
 
-        service_name = service.name
-        result_json = plnqk.execute_service(service_name,
+        service_name = service["name"]
+        result = plnqk.execute_service(service_name,
                                             data=train_data,
                                             params=train_params)
-        assert result_json is not None
+        assert result is not None
 
-        result = result_json["result"]
         model = result["model"]
 
         predict_data = dict()
@@ -50,10 +49,11 @@ def test_service_job_from_data_upload(config: Dict[str, Any], api_key: Dict[str,
                                            data=predict_data,
                                            params=predict_params)
             assert result is not None
+        cleanup_services_and_applications(applications, services, api_key)
+        assert True
     except Exception as e:
-        logger.debug(e)
-
-    cleanup_services_and_applications(applications, services, api_key)
+        logger.error(e)
+        assert False
 
 
 def test_service_job_from_data_pool(config: Dict[str, Any], api_key: Dict[str, str]):
@@ -83,13 +83,12 @@ def test_service_job_from_data_pool(config: Dict[str, Any], api_key: Dict[str, s
         assert service is not None
         services.append(service)
 
-        service_name = service.name
-        result_json = plnqk.execute_service(service_name,
+        service_name = service["name"]
+        result = plnqk.execute_service(service_name,
                                             data_ref=data_ref,
                                             params=train_params)
-        assert result_json is not None
+        assert result is not None
 
-        result = result_json["result"]
         model = result["model"]
 
         predict_data = dict()
@@ -104,10 +103,13 @@ def test_service_job_from_data_pool(config: Dict[str, Any], api_key: Dict[str, s
                                            data=predict_data,
                                            params=predict_params)
             assert result is not None
+
+        cleanup_services_and_applications(applications, services, api_key)
+
+        if data_pool_name is not None:
+            remove_data_pool(data_pool_name, api_key["apiKey"])
+
+        assert True
     except Exception as e:
-        logger.debug(e)
-
-    cleanup_services_and_applications(applications, services, api_key)
-
-    if data_pool_name is not None:
-        remove_data_pool(data_pool_name, api_key["apiKey"])
+        logger.error(e)
+        assert False

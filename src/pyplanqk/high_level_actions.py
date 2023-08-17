@@ -9,46 +9,43 @@ class PyPlanQK:
         self.api_key = {"apiKey": api_key}
         self.token_url = "https://gateway.platform.planqk.de/token"
 
-    def create_service(self, config: Dict[str, Any]) -> Optional[ServiceDto]:
+    def create_service(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        service_name = None
         try:
             service_name = config["name"]
-            logger.info(f"Create service: {service_name}")
+            logger.info(f"Create service: {service_name}.")
             service = get_service(service_name, self.api_key)
 
             if service is not None:
-                logger.info(f"Service {service_name} already created.")
+                logger.info(f"Service: {service_name} already created.")
                 return service
 
             service = create_managed_service(config, self.api_key)
-            assert service is not None
 
-            service_id = service.id
-            service_name = service.name
             version = get_version(service_name, self.api_key)
-            version_id = version.id
-            result = wait_for_service_to_be_created(service_id, version_id, self.api_key, timeout=500, step=5)
+            service_id = service["id"]
+            version_id = version["id"]
+            wait_for_service_to_be_created(service_id, version_id, self.api_key, timeout=500, step=5)
+
             service = get_service(service_name, self.api_key)
-            logger.info(f"Service {service_name} created.")
-            assert service
+            logger.info(f"Service: {service_name} created.")
+            return service
         except Exception as e:
-            service = None
             if service_name is not None:
-                logger.info(f"Creation of service {service_name} failed.")
+                logger.error(f"Creation of service: {service_name} failed.")
             else:
-                logger.info(f"Creation of service failed.")
-            logger.info(e)
-        return service
+                logger.error(f"Creation of service failed.")
+            logger.error(e)
+            raise e
 
     def execute_service(self,
                         service_name: str,
                         params: Dict[str, Any],
                         data: Dict[str, Any] = None,
-                        data_ref: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
-        logger.info("Execute service...")
-        try:
-            service = get_service(service_name, self.api_key)
+                        data_ref: Dict[str, Any] = None) -> Dict[str, Any]:
+        logger.info(f"Execute service: {service_name}.")
 
-            service_name = service.name
+        try:
             if data_ref is not None:
                 job = trigger_service_job(service_name=service_name,
                                           api_key=self.api_key,
@@ -61,19 +58,20 @@ class PyPlanQK:
                                           mode="DATA_UPLOAD",
                                           data=data,
                                           params=params)
-            assert job is not None
 
             job_id = job["id"]
             result = get_service_job_result(job_id, self.api_key)
-            assert result is not None
-            logger.info("Service execution finished.")
+            logger.info(f"Service execution: {service_name} finished.")
+            return result
         except Exception as e:
-            result = None
-            logger.info(e)
-        return result
+            logger.error(f"Service execution: {service_name} failed.")
+            logger.error(e)
+            raise e
 
-    def create_data_pool(self, data_pool_name: Optional[str], file) -> Optional[Dict[str, Any]]:
-        logger.info("Create data pool...")
+    def create_data_pool(self,
+                         data_pool_name: Optional[str],
+                         file) -> Dict[str, Any]:
+        logger.info(f"Create data pool: {data_pool_name}...")
         try:
             url = "https://platform.planqk.de/qc-catalog/data-pools"
 
@@ -87,20 +85,16 @@ class PyPlanQK:
             }
 
             response = requests.post(url, headers=headers, json=data)
-            data_pool = response.json()
-            logger.info("Data pool created.")
-            assert data_pool is not None
+            assert response.status_code in [200, 201, 204]
+            logger.info(f"Data pool: {data_pool_name} created.")
 
-            result = add_data_to_data_pool(data_pool_name, file, self.api_key["apiKey"])
-            assert result
+            add_data_to_data_pool(data_pool_name, file, self.api_key["apiKey"])
 
             file_infos = get_data_pool_file_information(data_pool_name, self.api_key["apiKey"])
-            assert file_infos is not None
             file_name = file.name.split("/")[-1]
             file_info = file_infos[file_name]
             return file_info
-
         except Exception as e:
-            file_info = None
-            logger.info(e)
-        return file_info
+            logger.error(f"Creation of data pool: {data_pool_name} failed.")
+            logger.error(e)
+            raise e

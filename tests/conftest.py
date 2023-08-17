@@ -138,10 +138,10 @@ def access_token() -> str:
 
 @pytest.fixture(scope="function")
 def service_info(config: Dict[str, Any],
-                 api_key: Dict[str, str]) -> Tuple[ServiceDto, Dict[str, Any]]:
+                 api_key: Dict[str, str]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     service = create_managed_service(config, api_key)
-    service_id = service.id
-    version_id = service.service_definitions[0].id
+    service_id = service["id"]
+    version_id = service["service_definitions"][0]["id"]
 
     wait_for_service_to_be_created(service_id, version_id, api_key, timeout=500, step=5)
 
@@ -149,11 +149,11 @@ def service_info(config: Dict[str, Any],
 
 
 @pytest.fixture(scope="function")
-def internally_published_service(service_info: Tuple[ServiceDto, Dict[str, Any]],
-                                 api_key: Dict[str, str]) -> ServiceDto:
+def internally_published_service(service_info: Tuple[Dict[str, Any], Dict[str, Any]],
+                                 api_key: Dict[str, str]) -> Dict[str, Any]:
     simple_service, config = service_info
 
-    service_name = simple_service.name
+    service_name = simple_service["name"]
 
     publish_service_internally(service_name, api_key)
 
@@ -161,17 +161,18 @@ def internally_published_service(service_info: Tuple[ServiceDto, Dict[str, Any]]
 
 
 @pytest.fixture(scope="function")
-def simple_application(api_key: Dict[str, str]) -> ApplicationDto:
+def simple_application(api_key: Dict[str, str]) -> Dict[str, Any]:
     application_name = f"application_{str(uuid.uuid4())}"
     application = create_application(application_name, api_key)
     return application
 
 
 @pytest.fixture(scope="function")
-def application_with_auth(api_key: Dict[str, str]) -> Tuple[ApplicationDto, str, str]:
+def application_with_auth(api_key: Dict[str, str]) -> Tuple[Dict[str, Any], str, str]:
     application_name = f"application_{str(uuid.uuid4())}"
     application = create_application(application_name, api_key)
     assert application is not None
+    print()
     print("Enter consumer_key:")
     consumer_key = input()
     print("Enter consumer_secret:")
@@ -181,10 +182,10 @@ def application_with_auth(api_key: Dict[str, str]) -> Tuple[ApplicationDto, str,
 
 @pytest.fixture(scope="function")
 def full_application(config: Dict[str, Any],
-                     api_key: Dict[str, str]) -> Tuple[ApplicationDto, ServiceDto, str, str]:
+                     api_key: Dict[str, str]) -> Tuple[Dict[str, Any], Dict[str, Any], str, str]:
     application_name = f"application_{str(uuid.uuid4())}"
     application = create_application(application_name, api_key)
-
+    print()
     print("Enter consumer_key:")
     consumer_key = input()
     print("Enter consumer_secret:")
@@ -192,9 +193,9 @@ def full_application(config: Dict[str, Any],
 
     service = create_managed_service(config, api_key)
 
-    service_name = service.name
-    service_id = service.id
-    version_id = service.service_definitions[0].id
+    service_name = service["name"]
+    service_id = service["id"]
+    version_id = service["service_definitions"][0]["id"]
 
     wait_for_service_to_be_created(service_id, version_id, api_key, timeout=500, step=5)
 

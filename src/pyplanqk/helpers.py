@@ -6,7 +6,6 @@ from openapi_client.api_client import ApiClient
 from openapi_client.apis import ServicePlatformServicesApi
 from openapi_client.apis import ServicePlatformJobsApi
 from openapi_client.configuration import Configuration
-from openapi_client.models import *
 
 from typing import Dict
 
@@ -27,7 +26,7 @@ def wait_for_service_to_be_created(service_id: str,
 
     timer = 0
     build_status = services_api.get_build_status(service_id, version_id)
-    assert type(build_status) == BuildJobDto
+    assert build_status is not None
     while build_status['status'] != 'SUCCESS' or build_status['status'] != 'FAILED':
         time.sleep(step)
         timer += step
@@ -36,7 +35,7 @@ def wait_for_service_to_be_created(service_id: str,
         # Check build status again to see if job failed or succeeded
         build_status = services_api.get_build_status(
             service_id=service_id, version_id=version_id)
-        assert type(build_status) == BuildJobDto
+        assert build_status is not None
         if build_status['status'] == 'SUCCESS':
             logger.debug("")
             return True

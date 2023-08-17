@@ -7,3 +7,10 @@ build-backend = "setuptools.build_meta"
 # For smarter version schemes and other configuration options,
 # check out https://github.com/pypa/setuptools_scm
 version_scheme = "no-guess-dev"
+
+[tool.pytest.ini_options]
+markers = [
+    "previously_wrong: only run previously wrong tests",
+    "interactive: only run run tests with user interaction",
+    "slow_service: only run run tests wich are slow because of the service creation",
+]

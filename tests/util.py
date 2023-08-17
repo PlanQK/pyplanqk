@@ -7,28 +7,28 @@ from typing import List, Any
 logger = logging.getLogger(__name__)
 
 
-def cleanup_services_and_applications(applications: List[ApplicationDto],
-                                      services: List[ServiceDto],
+def cleanup_services_and_applications(applications: List[Dict[str, Any]],
+                                      services: List[Dict[str, Any]],
                                       api_key: Dict[str, str]):
-    logger.debug("")
-    logger.debug("")
-    logger.debug("cleanup_services_and_applications")
+    logger.info("")
+    logger.info("")
+    logger.info("cleanup_services_and_applications")
     for application in applications:
-        application_name = application.name
+        application_name = application["name"]
         subscriptions = get_all_subscriptions(application_name, api_key)
 
         for _ in subscriptions:
             remove_subscription(application_name, api_key)
 
         remove_application(application_name, api_key)
-        logger.debug(f"remove_application: {application_name}")
+        logger.info(f"remove_application: {application_name}")
 
     for service in services:
-        service_name = service.name
+        service_name = service["name"]
         unpublish_service(service_name, api_key)
-        logger.debug(f"unpublish_service: {service_name}")
+        logger.info(f"unpublish_service: {service_name}")
         remove_service(service_name, api_key)
-        logger.debug(f"remove_service: {service_name}")
+        logger.info(f"remove_service: {service_name}")
 
 
 def label_data(x):
