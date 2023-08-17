@@ -457,7 +457,7 @@ def trigger_service_job(service_name: str,
         service = get_service(service_name, api_key)
         assert service is not None
 
-        service_definition_id = service["service_definitions"][0].id
+        service_definition_id = service["service_definitions"][0]["id"]
 
         if mode == "DATA_UPLOAD":
             create_job_request = CreateJobRequest(service_definition_id=service_definition_id,
@@ -476,7 +476,7 @@ def trigger_service_job(service_name: str,
             raise Exception("Invalid mode, allowed modes are: [DATA_UPLOAD, DATA_POOL].")
 
         job = service_jobs_api.create_job(create_job_request=create_job_request)
-        job_id = job.id
+        job_id = job["id"]
         wait_for_service_job_to_be_finished(job_id, api_key, timeout=timeout, step=step)
         job = service_jobs_api.get_job(job_id)
         return job
