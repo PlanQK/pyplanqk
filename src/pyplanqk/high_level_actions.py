@@ -87,6 +87,7 @@ class PyPlanQK:
             response = requests.post(url, headers=headers, json=data)
             assert response.status_code in [200, 201, 204]
             logger.info(f"Data pool: {data_pool_name} created.")
+            logger.debug("")
 
             add_data_to_data_pool(data_pool_name, file, self.api_key["apiKey"])
 

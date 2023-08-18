@@ -716,8 +716,11 @@ def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Dict[st
     try:
         data_pool = get_data_pool(data_pool_name, api_key)
         logger.debug(data_pool)
+        logger.debug("")
         assert data_pool is not None
         data_pool_id = data_pool["id"]
+        logger.debug(data_pool_id)
+        logger.debug("")
 
         url = f"https://platform.planqk.de/qc-catalog/data-pools/{data_pool_id}/data-source-descriptors"
 
@@ -732,6 +735,8 @@ def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Dict[st
 
         file_infos = dict()
         for entry in response_json:
+            logger.debug(entry["files"])
+            logger.debug("")
             name = entry["files"][0]["name"]
             file_infos[name] = dict()
             file_infos[name]["data_pool_id"] = data_pool_id
