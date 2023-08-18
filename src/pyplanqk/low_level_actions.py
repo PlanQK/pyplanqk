@@ -476,9 +476,11 @@ def trigger_service_job(service_name: str,
             raise Exception("Invalid mode, allowed modes are: [DATA_UPLOAD, DATA_POOL].")
 
         job = service_jobs_api.create_job(create_job_request=create_job_request)
+        print(job)
         job_id = job["id"]
         wait_for_service_job_to_be_finished(job_id, api_key, timeout=timeout, step=step)
         job = service_jobs_api.get_job(job_id)
+        print(job)
         return job
     except Exception as e:
         logger.error("Trigger service job failed.")

@@ -4,7 +4,7 @@ from pyplanqk.high_level_actions import PyPlanQK
 
 
 name = "pyplanqk"
-level = logging.INFO
+level = logging.DEBUG
 
 default_frmt_str = "%(asctime)s | [%(levelname)s] | %(name)s | %(message)s"
 formatter = logging.Formatter(default_frmt_str)
