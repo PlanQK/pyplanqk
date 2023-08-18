@@ -735,6 +735,7 @@ def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Dict[st
         for entry in response_json:
             name = entry["files"][0]["name"]
             file_infos[name] = dict()
+            file_infos[name]["identifier"] = name
             file_infos[name]["data_pool_id"] = data_pool_id
             file_infos[name]["data_source_descriptor_id"] = entry["id"]
             file_infos[name]["file_id"] = entry["files"][0]["id"]
