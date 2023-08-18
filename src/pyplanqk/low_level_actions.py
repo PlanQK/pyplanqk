@@ -715,6 +715,7 @@ def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Dict[st
 
     try:
         data_pool = get_data_pool(data_pool_name, api_key)
+        logger.debug(data_pool)
         assert data_pool is not None
         data_pool_id = data_pool["id"]
 
@@ -748,6 +749,7 @@ def add_data_to_data_pool(data_pool_name: str, file, api_key: str) -> bool:
 
     try:
         data_pool = get_data_pool(data_pool_name, api_key)
+        logger.debug(data_pool)
         assert data_pool is not None
         data_pool_id = data_pool["id"]
 
