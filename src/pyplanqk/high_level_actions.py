@@ -72,22 +72,15 @@ class PyPlanQK:
                          data_pool_name: Optional[str],
                          file) -> Dict[str, Any]:
         logger.info(f"Create data pool: {data_pool_name}...")
+
         try:
-            url = "https://platform.planqk.de/qc-catalog/data-pools"
+            data_pool = get_data_pool(data_pool_name, self.api_key["apiKey"])
 
-            headers = {
-                "Content-Type": "application/json",
-                "X-Auth-Token": self.api_key["apiKey"]
-            }
+            if data_pool is not None:
+                logger.info(f"Data pool: {data_pool_name} already created.")
+                return data_pool
 
-            data = {
-                "name": data_pool_name
-            }
-
-            response = requests.post(url, headers=headers, json=data)
-            assert response.status_code in [200, 201, 204]
-            logger.info(f"Data pool: {data_pool_name} created.")
-            logger.debug("")
+            create_data_pool(data_pool_name, self.api_key["apiKey"])
 
             add_data_to_data_pool(data_pool_name, file, self.api_key["apiKey"])
 

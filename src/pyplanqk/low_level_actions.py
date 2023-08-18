@@ -21,6 +21,7 @@ def create_managed_service(config: Dict[str, Any],
 
     try:
         service = services_api.create_managed_service(**config)
+        service = service.to_dict()
         logger.debug("Service creation triggered.")
         return service
     except Exception as e:
@@ -262,6 +263,7 @@ def get_service(service_name: str,
         if found_service is not None:
             service_id = found_service["id"]
             found_service = services_api.get_service(service_id)
+            found_service = found_service.to_dict()
 
         return found_service
     except Exception as e:
@@ -715,12 +717,8 @@ def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Dict[st
 
     try:
         data_pool = get_data_pool(data_pool_name, api_key)
-        logger.debug(data_pool)
-        logger.debug("")
         assert data_pool is not None
         data_pool_id = data_pool["id"]
-        logger.debug(data_pool_id)
-        logger.debug("")
 
         url = f"https://platform.planqk.de/qc-catalog/data-pools/{data_pool_id}/data-source-descriptors"
 
@@ -735,8 +733,6 @@ def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Dict[st
 
         file_infos = dict()
         for entry in response_json:
-            logger.debug(entry["files"])
-            logger.debug("")
             name = entry["files"][0]["name"]
             file_infos[name] = dict()
             file_infos[name]["data_pool_id"] = data_pool_id
@@ -754,7 +750,6 @@ def add_data_to_data_pool(data_pool_name: str, file, api_key: str) -> bool:
 
     try:
         data_pool = get_data_pool(data_pool_name, api_key)
-        logger.debug(data_pool)
         assert data_pool is not None
         data_pool_id = data_pool["id"]
 
