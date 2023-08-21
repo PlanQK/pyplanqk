@@ -283,7 +283,7 @@ def test_get_all_service_jobs_for_service(service_info: Tuple[Dict[str, Any], Di
     services = [simple_service]
     try:
         service_name = simple_service["name"]
-        jobs = get_all_service_jobs_for_service(service_name, api_key)
+        jobs = get_all_jobs_for_managed_service(service_name, api_key)
         assert len(jobs) == 0
 
         cleanup_services_and_applications(applications, services, api_key)

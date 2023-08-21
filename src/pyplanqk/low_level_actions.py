@@ -351,9 +351,9 @@ def get_access_token(consumer_key: str,
         raise e
 
 
-def get_all_service_jobs_for_service(service_name: str,
+def get_all_jobs_for_managed_service(service_name: str,
                                      api_key: Dict[str, str]) -> List[Dict[str, Any]]:
-    logger.debug("Get all service jobs for service.")
+    logger.debug("Get all service jobs for managed service.")
 
     configuration = Configuration(api_key=api_key)
     api_client = ApiClient(configuration=configuration)
@@ -416,19 +416,38 @@ def get_service_jobs(service_name: str, api_key: Dict[str, str]) -> List[Dict[st
         raise e
 
 
-def get_service_job(service_name: str,
-                    job_id: str,
-                    api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
-    logger.debug("Get service job.")
+def get_managed_service_job(service_name: str,
+                            job_id: str,
+                            api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
+    logger.debug("Get managed service job.")
 
     try:
-        jobs = get_all_service_jobs_for_service(service_name, api_key)
+        jobs = get_all_jobs_for_managed_service(service_name, api_key)
 
         found_job = None
         for job in jobs:
             if job["id"] == job_id:
                 found_job = job
         return found_job
+    except Exception as e:
+        logger.error("Get service job failed.")
+        logger.error(e)
+        raise e
+
+
+def get_service_job(job_id: str,
+                    api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
+    logger.debug("Get managed service job.")
+
+    try:
+        configuration = Configuration(api_key=api_key)
+        api_client = ApiClient(configuration=configuration)
+        service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
+
+        try:
+            job = service_jobs_api.get_job(job_id)
+            assert job is not None
+            return job
     except Exception as e:
         logger.error("Get service job failed.")
         logger.error(e)
