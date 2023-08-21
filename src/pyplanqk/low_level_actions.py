@@ -446,7 +446,7 @@ def get_service_job(job_id: str,
     try:
         job = service_jobs_api.get_job(job_id)
         assert job is not None
-        return job
+        return job.to_dict()
     except Exception as e:
         logger.error("Get service job failed.")
         logger.error(e)
