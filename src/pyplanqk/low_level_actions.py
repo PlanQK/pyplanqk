@@ -391,6 +391,31 @@ def get_all_service_jobs(api_key: Dict[str, str]) -> List[Dict[str, Any]]:
         raise e
 
 
+def get_service_jobs(service_name: str, api_key: Dict[str, str]) -> List[Dict[str, Any]]:
+    logger.debug("Get service jobs for service.")
+
+    configuration = Configuration(api_key=api_key)
+    api_client = ApiClient(configuration=configuration)
+    service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
+
+    try:
+        service = get_service(service_name, api_key)
+        assert service is not None
+        service_definition_id = service["service_definitions"][0]["id"]
+        jobs = service_jobs_api.get_jobs()
+        assert jobs is not None
+        service_jobs = []
+        for service_job in jobs:
+            service_job_definition_id = service_job["service_definition"]["id"]
+            if service_job_definition_id == service_definition_id:
+                service_jobs.append(service_job)
+        return service_jobs
+    except Exception as e:
+        logger.error("Get all service jobs failed.")
+        logger.error(e)
+        raise e
+
+
 def get_service_job(service_name: str,
                     job_id: str,
                     api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
@@ -451,7 +476,6 @@ def trigger_service_job(service_name: str,
                         data_ref: Dict[str, Any] = None,
                         timeout=500,
                         step=1) -> Dict[str, Any]:
-
     configuration = Configuration(api_key=api_key)
     api_client = ApiClient(configuration=configuration)
     service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
