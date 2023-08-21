@@ -408,7 +408,7 @@ def get_service_jobs(service_name: str, api_key: Dict[str, str]) -> List[Dict[st
         for service_job in jobs:
             service_job_definition_id = service_job["service_definition"]["id"]
             if service_job_definition_id == service_definition_id:
-                service_jobs.append(service_job)
+                service_jobs.append(service_job.to_dict())
         return service_jobs
     except Exception as e:
         logger.error("Get all service jobs failed.")
