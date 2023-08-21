@@ -439,15 +439,14 @@ def get_service_job(job_id: str,
                     api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
     logger.debug("Get managed service job.")
 
-    try:
-        configuration = Configuration(api_key=api_key)
-        api_client = ApiClient(configuration=configuration)
-        service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
+    configuration = Configuration(api_key=api_key)
+    api_client = ApiClient(configuration=configuration)
+    service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
 
-        try:
-            job = service_jobs_api.get_job(job_id)
-            assert job is not None
-            return job
+    try:
+        job = service_jobs_api.get_job(job_id)
+        assert job is not None
+        return job
     except Exception as e:
         logger.error("Get service job failed.")
         logger.error(e)
