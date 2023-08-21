@@ -233,8 +233,10 @@ def get_services(api_key: Dict[str, str],
             services.extend(created_services)
             services.extend(accessible_services)
             services.extend(published_services)
+            services = [service.to_dict() for service in services]
         else:
             services = services_api.get_services(lifecycle=lifecycle)
+            services = [service.to_dict() for service in services]
         return services
     except Exception as e:
         logger.error("Services retrieval failed.")
