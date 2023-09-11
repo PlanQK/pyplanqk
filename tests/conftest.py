@@ -66,8 +66,8 @@ def config() -> Dict[str, Any]:
 
     config = dict()
     config["name"] = f"service_{str(uuid.uuid4())}"
-    config["user_code"] = open("data/tests/data/template.zip", "rb")
-    config["api_definition"] = open("data/tests/data/openapi-spec.yml", "rb")
+    config["user_code"] = open("tests/data/template.zip", "rb")
+    config["api_definition"] = open("tests/data/openapi-spec.yml", "rb")
     config["description"] = "Service for unit testing."
     config["milli_cpus"] = 1000
     config["memory_in_megabytes"] = 4096

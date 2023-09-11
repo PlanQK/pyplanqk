@@ -70,7 +70,7 @@ def test_execute_service_train_data_upload(config: Dict[str, Any],
         json.dump(train_data, f)
         f.close()
 
-        f = open("data/tests/data/params.json", "w")
+        f = open("tests/data/params.json", "w")
         json.dump(train_params, f)
         f.close()
 
@@ -102,7 +102,7 @@ def test_execute_service_train_data_pool(data_pool_with_data: Dict[str, Any],
         assert service is not None
         services.append(service)
 
-        f = open("data/tests/data/params.json", "w")
+        f = open("tests/data/params.json", "w")
         json.dump(train_params, f)
         f.close()
 
