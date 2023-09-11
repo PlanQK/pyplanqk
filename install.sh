@@ -4,7 +4,7 @@
 npm install -g @openapitools/openapi-generator-cli
 
 # Create and navigate to the generator-output directory
-mkdir generator-output && cd generator-output
+mkdir generator-output && cd generator-output || exit
 
 # Set openapi-generator-cli version to 5.4.0
 openapi-generator-cli version-manager set 5.4.0
