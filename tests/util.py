@@ -42,11 +42,11 @@ def label_data(x):
 
 def save_data(train_data: Dict[str, Any],
               train_params: Dict[str, Any]):
-    f = open("data/data.json", "w")
+    f = open("data/tests/data/data.json", "w")
     json.dump(train_data, f)
     f.close()
 
-    f = open("data/params.json", "w")
+    f = open("data/tests/data/params.json", "w")
     json.dump(train_params, f)
     f.close()
 
@@ -54,7 +54,7 @@ def save_data(train_data: Dict[str, Any],
     data["data"] = train_data
     data["params"] = train_params
 
-    f = open("data/train_data.json", "w")
+    f = open("data/train_tests/data/data.json", "w")
     json.dump(data, f)
     f.close()
 

@@ -458,7 +458,7 @@ def test_trigger_service_job_data_pool_train(data_pool_with_data: Dict[str, Any]
         data_pool_name = data_pool_with_data["name"]
         file_infos = get_data_pool_file_information(data_pool_name, api_key["apiKey"])
 
-        train_data = file_infos["data.json"]
+        train_data = file_infos["tests/data/data.json"]
 
         job = trigger_service_job(service_name=service_name,
                                   api_key=api_key,
@@ -525,7 +525,7 @@ def test_add_data_to_data_pool(data_pool: Dict[str, str],
     logger.debug("test_add_data_to_data_pool")
     try:
         data_pool_name = data_pool["name"]
-        file = open("data/data.json", "rb")
+        file = open("data/tests/data/data.json", "rb")
         result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
         assert result
 

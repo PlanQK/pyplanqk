@@ -66,8 +66,8 @@ def config() -> Dict[str, Any]:
 
     config = dict()
     config["name"] = f"service_{str(uuid.uuid4())}"
-    config["user_code"] = open("data/template.zip", "rb")
-    config["api_definition"] = open("data/openapi-spec.yml", "rb")
+    config["user_code"] = open("data/tests/data/template.zip", "rb")
+    config["api_definition"] = open("data/tests/data/openapi-spec.yml", "rb")
     config["description"] = "Service for unit testing."
     config["milli_cpus"] = 1000
     config["memory_in_megabytes"] = 4096
@@ -118,7 +118,7 @@ def data_pool_with_data(api_key: Dict[str, str],
 
     save_data(train_data, train_params)
 
-    file = open("data/data.json", "rb")
+    file = open("data/tests/data/data.json", "rb")
     result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
     assert result
 

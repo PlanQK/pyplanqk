@@ -66,11 +66,11 @@ def test_execute_service_train_data_upload(config: Dict[str, Any],
         assert service is not None
         services.append(service)
 
-        f = open("data/data.json", "w")
+        f = open("data/tests/data/data.json", "w")
         json.dump(train_data, f)
         f.close()
 
-        f = open("data/params.json", "w")
+        f = open("data/tests/data/params.json", "w")
         json.dump(train_params, f)
         f.close()
 
@@ -102,7 +102,7 @@ def test_execute_service_train_data_pool(data_pool_with_data: Dict[str, Any],
         assert service is not None
         services.append(service)
 
-        f = open("data/params.json", "w")
+        f = open("data/tests/data/params.json", "w")
         json.dump(train_params, f)
         f.close()
 
@@ -110,7 +110,7 @@ def test_execute_service_train_data_pool(data_pool_with_data: Dict[str, Any],
         data_pool_name = data_pool_with_data["name"]
         file_infos = get_data_pool_file_information(data_pool_name, api_key["apiKey"])
 
-        train_data = file_infos["data.json"]
+        train_data = file_infos["tests/data/data.json"]
 
         result = plnqk.execute_service(service_name,
                                        data_ref=train_data,
@@ -163,7 +163,7 @@ def test_create_data_pool(api_key: Dict[str, str]):
     logger.debug("test_create_datapool")
 
     try:
-        file = open("data/data.json", "rb")
+        file = open("data/tests/data/data.json", "rb")
 
         plnqk = PyPlanQK(api_key["apiKey"])
         data_pool_name = f"data_pool_{str(uuid.uuid4())}"
