@@ -14,3 +14,5 @@ markers = [
     "interactive: only run run tests with user interaction",
     "slow_service: only run run tests wich are slow because of the service creation",
 ]
+log_cli = true
+log_cli_level = "DEBUG"
