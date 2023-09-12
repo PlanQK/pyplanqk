@@ -2,7 +2,6 @@ import logging
 
 from pyplanqk.high_level_actions import PyPlanQK
 
-
 name = "pyplanqk"
 level = logging.INFO
 

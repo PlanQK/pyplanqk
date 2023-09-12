@@ -1,15 +1,17 @@
+from typing import Any, List
+
 import numpy as np
 
 from pyplanqk.low_level_actions import *
 
-from typing import List, Any
-
 logger = logging.getLogger(__name__)
 
 
-def cleanup_services_and_applications(applications: List[Dict[str, Any]],
-                                      services: List[Dict[str, Any]],
-                                      api_key: Dict[str, str]):
+def cleanup_services_and_applications(
+    applications: List[Dict[str, Any]],
+    services: List[Dict[str, Any]],
+    api_key: Dict[str, str],
+):
     logger.info("")
     logger.info("")
     logger.info("cleanup_services_and_applications")
@@ -40,8 +42,7 @@ def label_data(x):
     return y_one_hot
 
 
-def save_data(train_data: Dict[str, Any],
-              train_params: Dict[str, Any]):
+def save_data(train_data: Dict[str, Any], train_params: Dict[str, Any]):
     f = open("tests/data/data.json", "w")
     json.dump(train_data, f)
     f.close()

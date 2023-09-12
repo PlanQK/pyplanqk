@@ -1,8 +1,7 @@
-import pytest
 import uuid
-
 from typing import Tuple
 
+import pytest
 from util import *
 
 
@@ -63,7 +62,6 @@ def predict_params() -> Dict[str, Any]:
 
 @pytest.fixture(scope="function")
 def config() -> Dict[str, Any]:
-
     config = dict()
     config["name"] = f"service_{str(uuid.uuid4())}"
     config["user_code"] = open("tests/data/template.zip", "rb")
@@ -83,14 +81,9 @@ def data_pool(api_key: Dict[str, str]) -> Dict[str, Any]:
     data_pool_name = f"data_pool_{str(uuid.uuid4())}"
     url = "https://platform.planqk.de/qc-catalog/data-pools"
 
-    headers = {
-        "Content-Type": "application/json",
-        "X-Auth-Token": api_key["apiKey"]
-    }
+    headers = {"Content-Type": "application/json", "X-Auth-Token": api_key["apiKey"]}
 
-    data = {
-        "name": data_pool_name
-    }
+    data = {"name": data_pool_name}
 
     response = requests.post(url, headers=headers, json=data)
     data_pool = response.json()
@@ -98,20 +91,15 @@ def data_pool(api_key: Dict[str, str]) -> Dict[str, Any]:
 
 
 @pytest.fixture(scope="function")
-def data_pool_with_data(api_key: Dict[str, str],
-                        train_data: Dict[str, list],
-                        train_params: Dict[str, list]) -> Dict[str, Any]:
+def data_pool_with_data(
+    api_key: Dict[str, str], train_data: Dict[str, list], train_params: Dict[str, list]
+) -> Dict[str, Any]:
     data_pool_name = f"data_pool_{str(uuid.uuid4())}"
     url = "https://platform.planqk.de/qc-catalog/data-pools"
 
-    headers = {
-        "Content-Type": "application/json",
-        "X-Auth-Token": api_key["apiKey"]
-    }
+    headers = {"Content-Type": "application/json", "X-Auth-Token": api_key["apiKey"]}
 
-    data = {
-        "name": data_pool_name
-    }
+    data = {"name": data_pool_name}
 
     response = requests.post(url, headers=headers, json=data)
     data_pool = response.json()
@@ -137,8 +125,9 @@ def access_token() -> str:
 
 
 @pytest.fixture(scope="function")
-def service_info(config: Dict[str, Any],
-                 api_key: Dict[str, str]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+def service_info(
+    config: Dict[str, Any], api_key: Dict[str, str]
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     service = create_managed_service(config, api_key)
     service_id = service["id"]
     version_id = service["service_definitions"][0]["id"]
@@ -149,8 +138,9 @@ def service_info(config: Dict[str, Any],
 
 
 @pytest.fixture(scope="function")
-def internally_published_service(service_info: Tuple[Dict[str, Any], Dict[str, Any]],
-                                 api_key: Dict[str, str]) -> Dict[str, Any]:
+def internally_published_service(
+    service_info: Tuple[Dict[str, Any], Dict[str, Any]], api_key: Dict[str, str]
+) -> Dict[str, Any]:
     simple_service, config = service_info
 
     service_name = simple_service["name"]
@@ -181,8 +171,9 @@ def application_with_auth(api_key: Dict[str, str]) -> Tuple[Dict[str, Any], str,
 
 
 @pytest.fixture(scope="function")
-def full_application(config: Dict[str, Any],
-                     api_key: Dict[str, str]) -> Tuple[Dict[str, Any], Dict[str, Any], str, str]:
+def full_application(
+    config: Dict[str, Any], api_key: Dict[str, str]
+) -> Tuple[Dict[str, Any], Dict[str, Any], str, str]:
     application_name = f"application_{str(uuid.uuid4())}"
     application = create_application(application_name, api_key)
     print()
@@ -207,18 +198,20 @@ def full_application(config: Dict[str, Any],
 
 
 @pytest.fixture(scope="function")
-def service_job(data: Dict[str, Any],
-                params: Dict[str, Any],
-                api_key: Dict[str, str]) -> JobDto:
+def service_job(
+    data: Dict[str, Any], params: Dict[str, Any], api_key: Dict[str, str]
+) -> JobDto:
     logger.debug("Trigger service job")
     configuration = Configuration(api_key=api_key)
     api_client = ApiClient(configuration=configuration)
     service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
 
-    create_job_request = CreateJobRequest(service_definition_id="596ffd0c-2551-4564-83f6-851f64078497",
-                                          input_data=json.dumps(data),
-                                          parameters=json.dumps(params),
-                                          serviceDefinition="596ffd0c-2551-4564-83f6-851f64078497",
-                                          persist_result=True)
+    create_job_request = CreateJobRequest(
+        service_definition_id="596ffd0c-2551-4564-83f6-851f64078497",
+        input_data=json.dumps(data),
+        parameters=json.dumps(params),
+        serviceDefinition="596ffd0c-2551-4564-83f6-851f64078497",
+        persist_result=True,
+    )
     job = service_jobs_api.create_job(create_job_request=create_job_request)
     return job

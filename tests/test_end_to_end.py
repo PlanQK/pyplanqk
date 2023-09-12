@@ -1,14 +1,12 @@
-import uuid
 import json
 import logging
+import uuid
+from typing import Any, Dict
+
+from conftest import cleanup_services_and_applications, get_data, get_params
+
 import pyplanqk
-
-from conftest import cleanup_services_and_applications
-from conftest import get_data, get_params
 from pyplanqk.low_level_actions import remove_data_pool
-
-from typing import Dict, Any
-
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +28,9 @@ def test_service_job_from_data_upload(config: Dict[str, Any], api_key: Dict[str,
         services.append(service)
 
         service_name = service["name"]
-        result = plnqk.execute_service(service_name,
-                                            data=train_data,
-                                            params=train_params)
+        result = plnqk.execute_service(
+            service_name, data=train_data, params=train_params
+        )
         assert result is not None
 
         model = result["model"]
@@ -45,9 +43,9 @@ def test_service_job_from_data_upload(config: Dict[str, Any], api_key: Dict[str,
 
         for i in range(3):
             predict_data["x"] = [train_data["X_test"][0]]
-            result = plnqk.execute_service(service_name,
-                                           data=predict_data,
-                                           params=predict_params)
+            result = plnqk.execute_service(
+                service_name, data=predict_data, params=predict_params
+            )
             assert result is not None
         cleanup_services_and_applications(applications, services, api_key)
         assert True
@@ -84,9 +82,9 @@ def test_service_job_from_data_pool(config: Dict[str, Any], api_key: Dict[str, s
         services.append(service)
 
         service_name = service["name"]
-        result = plnqk.execute_service(service_name,
-                                            data_ref=data_ref,
-                                            params=train_params)
+        result = plnqk.execute_service(
+            service_name, data_ref=data_ref, params=train_params
+        )
         assert result is not None
 
         model = result["model"]
@@ -99,9 +97,9 @@ def test_service_job_from_data_pool(config: Dict[str, Any], api_key: Dict[str, s
 
         for i in range(3):
             predict_data["x"] = [train_data["X_test"][0]]
-            result = plnqk.execute_service(service_name,
-                                           data=predict_data,
-                                           params=predict_params)
+            result = plnqk.execute_service(
+                service_name, data=predict_data, params=predict_params
+            )
             assert result is not None
 
         cleanup_services_and_applications(applications, services, api_key)

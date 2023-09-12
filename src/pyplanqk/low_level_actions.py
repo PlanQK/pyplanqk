@@ -1,18 +1,17 @@
-import os
 import json
-
-from pyplanqk.helpers import *
+import os
+from typing import Any, List, Optional
 
 from openapi_client.apis import ServicePlatformApplicationsApi
 from openapi_client.models import *
-
-from typing import Optional, List, Any
+from pyplanqk.helpers import *
 
 logger = logging.getLogger(__name__)
 
 
-def create_managed_service(config: Dict[str, Any],
-                           api_key: Dict[str, str]) -> Dict[str, Any]:
+def create_managed_service(
+    config: Dict[str, Any], api_key: Dict[str, str]
+) -> Dict[str, Any]:
     logger.debug("Create managed service.")
 
     configuration = Configuration(api_key=api_key)
@@ -30,8 +29,9 @@ def create_managed_service(config: Dict[str, Any],
         raise e
 
 
-def create_application(application_name: str,
-                       api_key: Dict[str, str]) -> Dict[str, Any]:
+def create_application(
+    application_name: str, api_key: Dict[str, str]
+) -> Dict[str, Any]:
     logger.debug("Create application.")
 
     configuration = Configuration(api_key=api_key)
@@ -40,7 +40,9 @@ def create_application(application_name: str,
 
     try:
         create_app_request = CreateApplicationRequest(name=application_name)
-        application = applications_api.create_application(create_application_request=create_app_request)
+        application = applications_api.create_application(
+            create_application_request=create_app_request
+        )
         logger.debug("Application created.")
         return application
     except Exception as e:
@@ -49,8 +51,9 @@ def create_application(application_name: str,
         raise e
 
 
-def publish_service_internally(service_name: str,
-                               api_key: Dict[str, str]) -> Dict[str, Any]:
+def publish_service_internally(
+    service_name: str, api_key: Dict[str, str]
+) -> Dict[str, Any]:
     logger.debug("Publish service internally.")
 
     configuration = Configuration(api_key=api_key)
@@ -73,8 +76,7 @@ def publish_service_internally(service_name: str,
         raise e
 
 
-def unpublish_service(service_name: str,
-                      api_key: Dict[str, str]) -> Dict[str, Any]:
+def unpublish_service(service_name: str, api_key: Dict[str, str]) -> Dict[str, Any]:
     logger.debug("Unpublish service.")
 
     configuration = Configuration(api_key=api_key)
@@ -97,8 +99,7 @@ def unpublish_service(service_name: str,
         raise e
 
 
-def remove_service(service_name: str,
-                   api_key: Dict[str, str]) -> bool:
+def remove_service(service_name: str, api_key: Dict[str, str]) -> bool:
     logger.debug("Remove service.")
 
     configuration = Configuration(api_key=api_key)
@@ -119,8 +120,7 @@ def remove_service(service_name: str,
         raise e
 
 
-def remove_application(application_name: str,
-                       api_key: Dict[str, str]) -> bool:
+def remove_application(application_name: str, api_key: Dict[str, str]) -> bool:
     logger.debug("Remove application.")
 
     configuration = Configuration(api_key=api_key)
@@ -140,8 +140,7 @@ def remove_application(application_name: str,
         raise e
 
 
-def remove_subscription(application_name: str,
-                        api_key: Dict[str, str]) -> bool:
+def remove_subscription(application_name: str, api_key: Dict[str, str]) -> bool:
     logger.debug("Remove subscription.")
 
     configuration = Configuration(api_key=api_key)
@@ -154,7 +153,9 @@ def remove_subscription(application_name: str,
         subscription = get_subscription(application_name, api_key)
         application_id = application["id"]
         subscription_id = subscription["id"]
-        applications_api.delete_application_subscription(application_id, subscription_id)
+        applications_api.delete_application_subscription(
+            application_id, subscription_id
+        )
         logger.debug("Subscription removed.")
         return True
     except Exception as e:
@@ -163,9 +164,9 @@ def remove_subscription(application_name: str,
         raise e
 
 
-def subscribe_application_to_service(application_name: str,
-                                     service_name: str,
-                                     api_key: Dict[str, str]) -> Dict[str, Any]:
+def subscribe_application_to_service(
+    application_name: str, service_name: str, api_key: Dict[str, str]
+) -> Dict[str, Any]:
     logger.debug("Subscribe application to service.")
 
     configuration = Configuration(api_key=api_key)
@@ -179,11 +180,11 @@ def subscribe_application_to_service(application_name: str,
         assert application is not None
         service_id = service["id"]
         application_id = application["id"]
-        subscription_request = CreateInternalSubscriptionRequest(application_id=application_id,
-                                                                 service_id=service_id)
+        subscription_request = CreateInternalSubscriptionRequest(
+            application_id=application_id, service_id=service_id
+        )
         subscription = applications_api.create_internal_subscription(
-            id=application_id,
-            create_internal_subscription_request=subscription_request
+            id=application_id, create_internal_subscription_request=subscription_request
         )
         logger.debug("Application subscribed.")
         return subscription
@@ -193,8 +194,9 @@ def subscribe_application_to_service(application_name: str,
         raise e
 
 
-def get_application(application_name: str,
-                    api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
+def get_application(
+    application_name: str, api_key: Dict[str, str]
+) -> Optional[Dict[str, Any]]:
     logger.debug("Get application.")
 
     configuration = Configuration(api_key=api_key)
@@ -215,8 +217,9 @@ def get_application(application_name: str,
         raise e
 
 
-def get_services(api_key: Dict[str, str],
-                 lifecycle: str = None) -> List[Dict[str, Any]]:
+def get_services(
+    api_key: Dict[str, str], lifecycle: str = None
+) -> List[Dict[str, Any]]:
     logger.debug("Get services.")
 
     configuration = Configuration(api_key=api_key)
@@ -244,8 +247,7 @@ def get_services(api_key: Dict[str, str],
         raise e
 
 
-def get_service(service_name: str,
-                api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
+def get_service(service_name: str, api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
     logger.debug("Get service.")
 
     configuration = Configuration(api_key=api_key)
@@ -253,7 +255,6 @@ def get_service(service_name: str,
     services_api = ServicePlatformServicesApi(api_client=api_client)
 
     try:
-
         services = get_services(api_key)
         assert services is not None
 
@@ -274,8 +275,7 @@ def get_service(service_name: str,
         raise e
 
 
-def get_version(service_name: str,
-                api_key: Dict[str, str]) -> Dict[str, Any]:
+def get_version(service_name: str, api_key: Dict[str, str]) -> Dict[str, Any]:
     logger.debug("Get version.")
 
     try:
@@ -288,8 +288,9 @@ def get_version(service_name: str,
         raise e
 
 
-def get_all_subscriptions(application_name: str,
-                          api_key: Dict[str, str]) -> List[Dict[str, Any]]:
+def get_all_subscriptions(
+    application_name: str, api_key: Dict[str, str]
+) -> List[Dict[str, Any]]:
     logger.debug("Get subscriptions.")
 
     configuration = Configuration(api_key=api_key)
@@ -308,8 +309,9 @@ def get_all_subscriptions(application_name: str,
         raise e
 
 
-def get_subscription(application_name: str,
-                     api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
+def get_subscription(
+    application_name: str, api_key: Dict[str, str]
+) -> Optional[Dict[str, Any]]:
     logger.debug("Get subscriptions.")
 
     configuration = Configuration(api_key=api_key)
@@ -329,19 +331,19 @@ def get_subscription(application_name: str,
         raise e
 
 
-def get_access_token(consumer_key: str,
-                     consumer_secret: str,
-                     token_url: str) -> str:
+def get_access_token(consumer_key: str, consumer_secret: str, token_url: str) -> str:
     logger.debug("Get access_token.")
 
     try:
-        data = {'grant_type': 'client_credentials'}
+        data = {"grant_type": "client_credentials"}
 
-        response = requests.post(token_url,
-                                 data=data,
-                                 verify=False,
-                                 allow_redirects=False,
-                                 auth=(consumer_key, consumer_secret))
+        response = requests.post(
+            token_url,
+            data=data,
+            verify=False,
+            allow_redirects=False,
+            auth=(consumer_key, consumer_secret),
+        )
         assert response.status_code in [200, 201, 204]
         json_response = response.json()
         return json_response["access_token"]
@@ -351,8 +353,9 @@ def get_access_token(consumer_key: str,
         raise e
 
 
-def get_all_jobs_for_managed_service(service_name: str,
-                                     api_key: Dict[str, str]) -> List[Dict[str, Any]]:
+def get_all_jobs_for_managed_service(
+    service_name: str, api_key: Dict[str, str]
+) -> List[Dict[str, Any]]:
     logger.debug("Get all service jobs for managed service.")
 
     configuration = Configuration(api_key=api_key)
@@ -391,7 +394,9 @@ def get_all_service_jobs(api_key: Dict[str, str]) -> List[Dict[str, Any]]:
         raise e
 
 
-def get_service_jobs(service_name: str, api_key: Dict[str, str]) -> List[Dict[str, Any]]:
+def get_service_jobs(
+    service_name: str, api_key: Dict[str, str]
+) -> List[Dict[str, Any]]:
     logger.debug("Get service jobs for service.")
 
     configuration = Configuration(api_key=api_key)
@@ -416,9 +421,9 @@ def get_service_jobs(service_name: str, api_key: Dict[str, str]) -> List[Dict[st
         raise e
 
 
-def get_managed_service_job(service_name: str,
-                            job_id: str,
-                            api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
+def get_managed_service_job(
+    service_name: str, job_id: str, api_key: Dict[str, str]
+) -> Optional[Dict[str, Any]]:
     logger.debug("Get managed service job.")
 
     try:
@@ -435,8 +440,7 @@ def get_managed_service_job(service_name: str,
         raise e
 
 
-def get_service_job(job_id: str,
-                    api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
+def get_service_job(job_id: str, api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
     logger.debug("Get managed service job.")
 
     configuration = Configuration(api_key=api_key)
@@ -453,11 +457,13 @@ def get_service_job(job_id: str,
         raise e
 
 
-def trigger_application_job(service_name: str,
-                            data: Dict[str, list],
-                            params: Dict[str, str],
-                            access_token: str,
-                            api_key: Dict[str, str]) -> Dict[str, Any]:
+def trigger_application_job(
+    service_name: str,
+    data: Dict[str, list],
+    params: Dict[str, str],
+    access_token: str,
+    api_key: Dict[str, str],
+) -> Dict[str, Any]:
     logger.debug("Trigger application execution.")
 
     try:
@@ -466,15 +472,12 @@ def trigger_application_job(service_name: str,
         service_endpoint = f"{service_endpoint}/"
 
         headers = {
-            'accept': 'application/json',
+            "accept": "application/json",
             "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
-        payload = {
-            "data": data,
-            "params": params
-        }
+        payload = {"data": data, "params": params}
 
         response = requests.post(service_endpoint, json=payload, headers=headers)
         assert response.status_code in [200, 201, 204]
@@ -486,14 +489,16 @@ def trigger_application_job(service_name: str,
         raise e
 
 
-def trigger_service_job(service_name: str,
-                        api_key: Dict[str, str],
-                        data: Dict[str, Any] = None,
-                        params: Dict[str, Any] = None,
-                        mode: str = "DATA_UPLOAD",
-                        data_ref: Dict[str, Any] = None,
-                        timeout=500,
-                        step=1) -> Dict[str, Any]:
+def trigger_service_job(
+    service_name: str,
+    api_key: Dict[str, str],
+    data: Dict[str, Any] = None,
+    params: Dict[str, Any] = None,
+    mode: str = "DATA_UPLOAD",
+    data_ref: Dict[str, Any] = None,
+    timeout=500,
+    step=1,
+) -> Dict[str, Any]:
     configuration = Configuration(api_key=api_key)
     api_client = ApiClient(configuration=configuration)
     service_jobs_api = ServicePlatformJobsApi(api_client=api_client)
@@ -505,20 +510,25 @@ def trigger_service_job(service_name: str,
         service_definition_id = service["service_definitions"][0]["id"]
 
         if mode == "DATA_UPLOAD":
-            create_job_request = CreateJobRequest(service_definition_id=service_definition_id,
-                                                  input_data=json.dumps(data),
-                                                  parameters=json.dumps(params),
-                                                  persist_result=True)
+            create_job_request = CreateJobRequest(
+                service_definition_id=service_definition_id,
+                input_data=json.dumps(data),
+                parameters=json.dumps(params),
+                persist_result=True,
+            )
         elif mode == "DATA_POOL":
-
             data_ref = DataPoolRef(**data_ref)
 
-            create_job_request = CreateJobRequest(service_definition_id=service_definition_id,
-                                                  input_data_ref=data_ref,
-                                                  parameters=json.dumps(params),
-                                                  persist_result=True)
+            create_job_request = CreateJobRequest(
+                service_definition_id=service_definition_id,
+                input_data_ref=data_ref,
+                parameters=json.dumps(params),
+                persist_result=True,
+            )
         else:
-            raise Exception("Invalid mode, allowed modes are: [DATA_UPLOAD, DATA_POOL].")
+            raise Exception(
+                "Invalid mode, allowed modes are: [DATA_UPLOAD, DATA_POOL]."
+            )
 
         job = service_jobs_api.create_job(create_job_request=create_job_request)
         job_id = job["id"]
@@ -548,8 +558,7 @@ def remove_service_job(job_id: str, api_key: Dict[str, str]) -> bool:
         raise e
 
 
-def get_service_job_status(job_id: str,
-                           api_key: Dict[str, str]) -> str:
+def get_service_job_status(job_id: str, api_key: Dict[str, str]) -> str:
     logger.debug("Get service job status.")
 
     configuration = Configuration(api_key=api_key)
@@ -566,8 +575,7 @@ def get_service_job_status(job_id: str,
         raise e
 
 
-def get_service_job_result(job_id: str,
-                           api_key: Dict[str, str]) -> Dict[str, Any]:
+def get_service_job_result(job_id: str, api_key: Dict[str, str]) -> Dict[str, Any]:
     logger.debug("Get service job result.")
 
     configuration = Configuration(api_key=api_key)
@@ -587,10 +595,9 @@ def get_service_job_result(job_id: str,
         raise e
 
 
-def get_application_job_info(service_name: str,
-                             job_id: str,
-                             access_token: str,
-                             api_key: Dict[str, str]) -> Dict[str, Any]:
+def get_application_job_info(
+    service_name: str, job_id: str, access_token: str, api_key: Dict[str, str]
+) -> Dict[str, Any]:
     logger.debug("Get application job info.")
 
     try:
@@ -599,8 +606,8 @@ def get_application_job_info(service_name: str,
         service_endpoint = version["gateway_endpoint"]
         service_endpoint = os.path.join(service_endpoint, job_id)
         headers = {
-            'accept': 'application/json',
-            "Authorization": f"Bearer {access_token}"
+            "accept": "application/json",
+            "Authorization": f"Bearer {access_token}",
         }
 
         response = requests.get(service_endpoint, headers=headers)
@@ -612,10 +619,9 @@ def get_application_job_info(service_name: str,
         raise e
 
 
-def get_application_job_status(service_name: str,
-                               job_id: str,
-                               access_token: str,
-                               api_key: Dict[str, str]) -> str:
+def get_application_job_status(
+    service_name: str, job_id: str, access_token: str, api_key: Dict[str, str]
+) -> str:
     logger.debug("Get application job status.")
 
     try:
@@ -624,8 +630,8 @@ def get_application_job_status(service_name: str,
         service_endpoint = version["gateway_endpoint"]
         service_endpoint = os.path.join(service_endpoint, job_id)
         headers = {
-            'accept': 'application/json',
-            "Authorization": f"Bearer {access_token}"
+            "accept": "application/json",
+            "Authorization": f"Bearer {access_token}",
         }
 
         response = requests.get(service_endpoint, headers=headers)
@@ -638,10 +644,9 @@ def get_application_job_status(service_name: str,
         raise e
 
 
-def get_application_job_result(service_name: str,
-                               job_id: str,
-                               access_token: str,
-                               api_key: Dict[str, str]) -> Dict[str, Any]:
+def get_application_job_result(
+    service_name: str, job_id: str, access_token: str, api_key: Dict[str, str]
+) -> Dict[str, Any]:
     logger.debug("Get application job result.")
 
     try:
@@ -650,8 +655,8 @@ def get_application_job_result(service_name: str,
         service_endpoint = version["gateway_endpoint"]
         service_endpoint = os.path.join(service_endpoint, job_id, "result")
         headers = {
-            'accept': 'application/json',
-            "Authorization": f"Bearer {access_token}"
+            "accept": "application/json",
+            "Authorization": f"Bearer {access_token}",
         }
 
         response = requests.get(service_endpoint, headers=headers)
@@ -671,10 +676,7 @@ def get_data_pools(api_key: str) -> List[Dict[str, Any]]:
     try:
         url = "https://platform.planqk.de/qc-catalog/data-pools"
 
-        headers = {
-            "Content-Type": "application/json",
-            "X-Auth-Token": api_key
-        }
+        headers = {"Content-Type": "application/json", "X-Auth-Token": api_key}
 
         response = requests.get(url, headers=headers)
         assert response.status_code in [200, 201, 204]
@@ -692,14 +694,9 @@ def create_data_pool(data_pool_name: str, api_key: str) -> Dict[str, Any]:
     try:
         url = "https://platform.planqk.de/qc-catalog/data-pools"
 
-        headers = {
-            "Content-Type": "application/json",
-            "X-Auth-Token": api_key
-        }
+        headers = {"Content-Type": "application/json", "X-Auth-Token": api_key}
 
-        data = {
-            "name": data_pool_name
-        }
+        data = {"name": data_pool_name}
 
         response = requests.post(url, headers=headers, json=data)
         assert response.status_code in [200, 201, 204]
@@ -734,10 +731,7 @@ def remove_data_pool(data_pool_name: str, api_key: str) -> bool:
     logger.debug("Remove data pool.")
 
     try:
-        headers = {
-            "Content-Type": "application/json",
-            "X-Auth-Token": api_key
-        }
+        headers = {"Content-Type": "application/json", "X-Auth-Token": api_key}
 
         data_pool = get_data_pool(data_pool_name, api_key)
         assert data_pool is not None
@@ -764,10 +758,7 @@ def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Dict[st
 
         url = f"https://platform.planqk.de/qc-catalog/data-pools/{data_pool_id}/data-source-descriptors"
 
-        headers = {
-            "Content-Type": "application/json",
-            "X-Auth-Token": api_key
-        }
+        headers = {"Content-Type": "application/json", "X-Auth-Token": api_key}
 
         response = requests.get(url, headers=headers)
         assert response.status_code in [200, 201, 204]
@@ -798,9 +789,7 @@ def add_data_to_data_pool(data_pool_name: str, file, api_key: str) -> bool:
 
         url = f"https://platform.planqk.de/qc-catalog/data-pools/{data_pool_id}/data-source-descriptors"
 
-        headers = {
-            "X-Auth-Token": api_key
-        }
+        headers = {"X-Auth-Token": api_key}
 
         files = {"file": file}
 

@@ -4,7 +4,6 @@ logger = logging.getLogger("pyplanqk")
 
 
 class PyPlanQK:
-
     def __init__(self, api_key):
         self.api_key = {"apiKey": api_key}
         self.token_url = "https://gateway.platform.planqk.de/token"
@@ -25,7 +24,9 @@ class PyPlanQK:
             version = get_version(service_name, self.api_key)
             service_id = service["id"]
             version_id = version["id"]
-            wait_for_service_to_be_created(service_id, version_id, self.api_key, timeout=500, step=5)
+            wait_for_service_to_be_created(
+                service_id, version_id, self.api_key, timeout=500, step=5
+            )
 
             service = get_service(service_name, self.api_key)
             logger.info(f"Service: {service_name} created.")
@@ -38,26 +39,32 @@ class PyPlanQK:
             logger.error(e)
             raise e
 
-    def execute_service(self,
-                        service_name: str,
-                        params: Dict[str, Any],
-                        data: Dict[str, Any] = None,
-                        data_ref: Dict[str, Any] = None) -> Dict[str, Any]:
+    def execute_service(
+        self,
+        service_name: str,
+        params: Dict[str, Any],
+        data: Dict[str, Any] = None,
+        data_ref: Dict[str, Any] = None,
+    ) -> Dict[str, Any]:
         logger.info(f"Execute service: {service_name}.")
 
         try:
             if data_ref is not None:
-                job = trigger_service_job(service_name=service_name,
-                                          api_key=self.api_key,
-                                          mode="DATA_POOL",
-                                          data_ref=data_ref,
-                                          params=params)
+                job = trigger_service_job(
+                    service_name=service_name,
+                    api_key=self.api_key,
+                    mode="DATA_POOL",
+                    data_ref=data_ref,
+                    params=params,
+                )
             else:
-                job = trigger_service_job(service_name=service_name,
-                                          api_key=self.api_key,
-                                          mode="DATA_UPLOAD",
-                                          data=data,
-                                          params=params)
+                job = trigger_service_job(
+                    service_name=service_name,
+                    api_key=self.api_key,
+                    mode="DATA_UPLOAD",
+                    data=data,
+                    params=params,
+                )
 
             job_id = job["id"]
             result = get_service_job_result(job_id, self.api_key)
@@ -68,9 +75,7 @@ class PyPlanQK:
             logger.error(e)
             raise e
 
-    def create_data_pool(self,
-                         data_pool_name: Optional[str],
-                         file) -> Dict[str, Any]:
+    def create_data_pool(self, data_pool_name: Optional[str], file) -> Dict[str, Any]:
         logger.info(f"Create data pool: {data_pool_name}...")
 
         try:
@@ -84,7 +89,9 @@ class PyPlanQK:
 
             add_data_to_data_pool(data_pool_name, file, self.api_key["apiKey"])
 
-            file_infos = get_data_pool_file_information(data_pool_name, self.api_key["apiKey"])
+            file_infos = get_data_pool_file_information(
+                data_pool_name, self.api_key["apiKey"]
+            )
             file_name = file.name.split("/")[-1]
             file_info = file_infos[file_name]
             return file_info

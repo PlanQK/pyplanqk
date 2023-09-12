@@ -1,23 +1,24 @@
-import time
-import requests
 import logging
-
-from openapi_client.api_client import ApiClient
-from openapi_client.apis import ServicePlatformServicesApi
-from openapi_client.apis import ServicePlatformJobsApi
-from openapi_client.configuration import Configuration
-
+import time
 from typing import Dict
 
+import requests
+
+from openapi_client.api_client import ApiClient
+from openapi_client.apis import (ServicePlatformJobsApi,
+                                 ServicePlatformServicesApi)
+from openapi_client.configuration import Configuration
 
 logger = logging.getLogger(__name__)
 
 
-def wait_for_service_to_be_created(service_id: str,
-                                   version_id: str,
-                                   api_key: Dict[str, str],
-                                   timeout: int = 500,
-                                   step: int = 1) -> bool:
+def wait_for_service_to_be_created(
+    service_id: str,
+    version_id: str,
+    api_key: Dict[str, str],
+    timeout: int = 500,
+    step: int = 1,
+) -> bool:
     logger.debug("Wait for service to be created")
 
     configuration = Configuration(api_key=api_key)
@@ -27,39 +28,39 @@ def wait_for_service_to_be_created(service_id: str,
     timer = 0
     build_status = services_api.get_build_status(service_id, version_id)
     assert build_status is not None
-    while build_status['status'] != 'SUCCESS' or build_status['status'] != 'FAILED':
+    while build_status["status"] != "SUCCESS" or build_status["status"] != "FAILED":
         time.sleep(step)
         timer += step
         if timer > timeout:
             return False
         # Check build status again to see if job failed or succeeded
         build_status = services_api.get_build_status(
-            service_id=service_id, version_id=version_id)
+            service_id=service_id, version_id=version_id
+        )
         assert build_status is not None
-        if build_status['status'] == 'SUCCESS':
+        if build_status["status"] == "SUCCESS":
             logger.debug("")
             return True
-        elif build_status['status'] in ['FAILED', 'CANCELLED']:
+        elif build_status["status"] in ["FAILED", "CANCELLED"]:
             logger.debug("")
             return False
         else:
             logger.debug(f"{timer + 1}|{timeout} Creating service...")
 
 
-def wait_for_application_job_to_be_finished(url: str,
-                                            access_token: str,
-                                            timeout: int = 500,
-                                            step: int = 1) -> bool:
+def wait_for_application_job_to_be_finished(
+    url: str, access_token: str, timeout: int = 500, step: int = 1
+) -> bool:
     logger.debug("Wait for execution to be finished")
 
     headers = {
-        'accept': 'application/json',
+        "accept": "application/json",
         "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
     }
 
     status_timer = 0
-    execution_status = requests.get(url=url, headers=headers).json()['status']
+    execution_status = requests.get(url=url, headers=headers).json()["status"]
     while execution_status not in ["SUCCEEDED", "FAILED"]:
         time.sleep(step)
         status_timer += step
@@ -67,21 +68,20 @@ def wait_for_application_job_to_be_finished(url: str,
             logger.debug("")
             logger.debug("Execution timeout")
             return False
-        execution_status = requests.get(url=url, headers=headers).json()['status']
-        if execution_status == 'SUCCEEDED':
+        execution_status = requests.get(url=url, headers=headers).json()["status"]
+        if execution_status == "SUCCEEDED":
             logger.debug("Execution succeeded")
             return True
-        elif execution_status == 'FAILED':
+        elif execution_status == "FAILED":
             logger.debug("Execution failed")
             return False
         else:
             logger.debug(f"{status_timer + 1}|{timeout} Wait for job...")
 
 
-def wait_for_service_job_to_be_finished(job_id: str,
-                                        api_key: Dict[str, str],
-                                        timeout: int = 500,
-                                        step: int = 1) -> bool:
+def wait_for_service_job_to_be_finished(
+    job_id: str, api_key: Dict[str, str], timeout: int = 500, step: int = 1
+) -> bool:
     logger.debug("Wait for service job to be finished")
 
     configuration = Configuration(api_key=api_key)
@@ -99,10 +99,10 @@ def wait_for_service_job_to_be_finished(job_id: str,
             logger.debug("Execution timeout")
             return False
         status = service_jobs_api.get_job(job_id).status
-        if status == 'SUCCEEDED':
+        if status == "SUCCEEDED":
             logger.debug("Execution succeeded")
             return True
-        elif status == 'FAILED':
+        elif status == "FAILED":
             logger.debug("Execution failed")
             return False
         else:
