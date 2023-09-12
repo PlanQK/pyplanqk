@@ -65,11 +65,11 @@ def test_service_job_from_data_pool(config: Dict[str, Any], api_key: Dict[str, s
 
     try:
         train_data = get_data(num_samples_train=800, num_samples_test=200)
-        f_data = open("/tmp/tests/data/data.json", "w")
+        f_data = open("/tmp/data.json", "w")
         json.dump(train_data, f_data)
         f_data.close()
 
-        f_data = open("/tmp/tests/data/data.json", "rb")
+        f_data = open("/tmp/data.json", "rb")
 
         train_params = get_params(maxiter=100, reps=3)
 

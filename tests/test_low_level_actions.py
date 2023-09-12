@@ -360,7 +360,7 @@ def test_trigger_application_job_predict(full_application: Tuple[Dict[str, Any],
                                          predict_data: Dict[str, list],
                                          predict_params: Dict[str, str]):
     print()
-    logger.debug("test_trigger_application_execution")
+    logger.debug("test_trigger_application_job_predict")
     application, service, consumer_key, consumer_secret = full_application
     access_token = get_access_token(consumer_key, consumer_secret, token_url)
 
@@ -525,7 +525,7 @@ def test_add_data_to_data_pool(data_pool: Dict[str, str],
     logger.debug("test_add_data_to_data_pool")
     try:
         data_pool_name = data_pool["name"]
-        file = open("data/tests/data/data.json", "rb")
+        file = open("tests/data/data.json", "rb")
         result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
         assert result
 

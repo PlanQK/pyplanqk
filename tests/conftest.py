@@ -116,9 +116,9 @@ def data_pool_with_data(api_key: Dict[str, str],
     response = requests.post(url, headers=headers, json=data)
     data_pool = response.json()
 
-    save_data(train_data, train_params)
+    # save_data(train_data, train_params)
 
-    file = open("data/tests/data/data.json", "rb")
+    file = open("tests/data/data.json", "rb")
     result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
     assert result
 
