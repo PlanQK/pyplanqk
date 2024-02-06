@@ -7,7 +7,7 @@ from util import *
 
 @pytest.fixture(scope="function")
 def api_key() -> Dict[str, str]:
-    api_key = "bb7f15afefee47362632a3f04dfdd8ee2f0fd5403a6588191df9465ddcf3a7d1e5d2339b4f83538af2d9b8b98d7fdd7e"
+    api_key = "plqk_QNNS83d5b9geIIlYmqnb2yYNv8nmBizJv1oZye5kCS"
     api_key = {"apiKey": api_key}
     return api_key
 
@@ -215,3 +215,13 @@ def service_job(
     )
     job = service_jobs_api.create_job(create_job_request=create_job_request)
     return job
+
+class generalTestParameters:
+    pathdelimiter : str = ''
+    if os.name == 'nt':
+        pathdelimiter : str = '\\'
+    elif os.name == 'posix':
+        pathdelimiter : str = '/'
+    testdataPath : str = f'tests{pathdelimiter}data{pathdelimiter}'
+
+
