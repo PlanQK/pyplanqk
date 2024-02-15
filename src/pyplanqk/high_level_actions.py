@@ -92,7 +92,7 @@ class PyPlanQK:
             file_infos = get_data_pool_file_information(
                 data_pool_name, self.api_key["apiKey"]
             )
-            file_name = file.name.split("/")[-1]
+            file_name = file.name.split(get_path_delimiter)[-1]
             file_info = file_infos[file_name]
             return file_info
         except Exception as e:

@@ -1,6 +1,6 @@
 import uuid
 from typing import Tuple
-
+from conftest import generalTestParameters
 import pytest
 from util import *
 
@@ -489,7 +489,7 @@ def test_trigger_service_job_data_pool_train(
         data_pool_name = data_pool_with_data["name"]
         file_infos = get_data_pool_file_information(data_pool_name, api_key["apiKey"])
 
-        train_data = file_infos["tests/data/data.json"]
+        train_data = file_infos[f"{generalTestParameters.testdataPath}data.json"]
 
         job = trigger_service_job(
             service_name=service_name,
@@ -556,7 +556,7 @@ def test_add_data_to_data_pool(data_pool: Dict[str, str], api_key: Dict[str, str
     logger.debug("test_add_data_to_data_pool")
     try:
         data_pool_name = data_pool["name"]
-        file = open("tests/data/data.json", "rb")
+        file = open(f"{generalTestParameters.testdataPath}data.json", "rb")
         result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
         assert result
 

@@ -1,7 +1,7 @@
 import uuid
 from typing import Dict, Tuple
 
-from conftest import cleanup_services_and_applications
+from conftest import cleanup_services_and_applications, generalTestParameters
 
 from pyplanqk.high_level_actions import PyPlanQK
 from pyplanqk.low_level_actions import *
@@ -67,11 +67,11 @@ def test_execute_service_train_data_upload(
         assert service is not None
         services.append(service)
 
-        f = open("tests/data/data.json", "w")
+        f = open(f"{generalTestParameters.testdataPath}data.json", "w")
         json.dump(train_data, f)
         f.close()
 
-        f = open("tests/data/params.json", "w")
+        f = open(f"{generalTestParameters.testdataPath}params.json", "w")
         json.dump(train_params, f)
         f.close()
 
@@ -105,7 +105,7 @@ def test_execute_service_train_data_pool(
         assert service is not None
         services.append(service)
 
-        f = open("tests/data/params.json", "w")
+        f = open(f"{generalTestParameters.testdataPath}params.json", "w")
         json.dump(train_params, f)
         f.close()
 
@@ -166,9 +166,9 @@ def test_execute_service_predict(
 def test_create_data_pool(api_key: Dict[str, str]):
     print()
     logger.debug("test_create_datapool")
-
+    filepath = generalTestParameters.testdataPath+'data.json'
     try:
-        file = open("tests/data/data.json", "rb")
+        file = open(filepath, "rb")
 
         plnqk = PyPlanQK(api_key["apiKey"])
         data_pool_name = f"data_pool_{str(uuid.uuid4())}"

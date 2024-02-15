@@ -216,12 +216,6 @@ def service_job(
     job = service_jobs_api.create_job(create_job_request=create_job_request)
     return job
 
-class generalTestParameters:
-    pathdelimiter : str = ''
-    if os.name == 'nt':
-        pathdelimiter : str = '\\'
-    elif os.name == 'posix':
-        pathdelimiter : str = '/'
-    testdataPath : str = f'tests{pathdelimiter}data{pathdelimiter}'
+
 
 
