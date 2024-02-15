@@ -1,5 +1,4 @@
 from typing import Any, List
-
 import numpy as np
 
 from pyplanqk.low_level_actions import *
@@ -43,11 +42,12 @@ def label_data(x):
 
 
 def save_data(train_data: Dict[str, Any], train_params: Dict[str, Any]):
-    f = open("tests/data/data.json", "w")
+    d = generalTestParameters.pathdelimiter
+    f = open(f"{generalTestParameters.testdataPath}data.json", "w")
     json.dump(train_data, f)
     f.close()
 
-    f = open("tests/data/params.json", "w")
+    f = open(f"{generalTestParameters.testdataPath}params.json", "w")
     json.dump(train_params, f)
     f.close()
 
@@ -55,7 +55,7 @@ def save_data(train_data: Dict[str, Any], train_params: Dict[str, Any]):
     data["data"] = train_data
     data["params"] = train_params
 
-    f = open("data/train_tests/data/data.json", "w")
+    f = open(f"data{d}train_tests{d}data{d}data.json", "w")
     json.dump(data, f)
     f.close()
 
@@ -82,3 +82,11 @@ def get_data(num_samples_train=80, num_samples_test=20) -> Dict[str, Any]:
     data["y_test"] = label_data(x_test).tolist()
 
     return data
+
+class generalTestParameters:
+    pathdelimiter : str = ''
+    if os.name == 'nt':
+        pathdelimiter : str = '\\'
+    elif os.name == 'posix':
+        pathdelimiter : str = '/'
+    testdataPath : str = f'tests{pathdelimiter}data{pathdelimiter}'

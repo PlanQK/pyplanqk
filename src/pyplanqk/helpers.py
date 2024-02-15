@@ -1,6 +1,7 @@
 import logging
 import time
 from typing import Dict
+import os
 
 import requests
 
@@ -107,3 +108,12 @@ def wait_for_service_job_to_be_finished(
             return False
         else:
             logger.debug(f"{status_timer + 1}|{timeout} Wait for job...")
+
+
+def get_path_delimiter() -> str:
+    pathdelimiter : str = ''
+    if os.name == 'nt':
+        pathdelimiter : str = '\\'
+    elif os.name == 'posix':
+        pathdelimiter : str = '/'
+    return pathdelimiter

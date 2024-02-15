@@ -11,7 +11,7 @@ formatter = logging.Formatter(default_frmt_str)
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter)
 
-logger = logging.getLogger(name)
+logger = logging.getLogger(__name__)
 logger.setLevel(level)
 
 logger.addHandler(stream_handler)

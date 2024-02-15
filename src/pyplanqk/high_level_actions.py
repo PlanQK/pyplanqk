@@ -1,6 +1,7 @@
 from pyplanqk.low_level_actions import *
 
-logger = logging.getLogger("pyplanqk")
+logger = logging.getLogger(__name__)
+
 
 
 class PyPlanQK:
@@ -50,6 +51,7 @@ class PyPlanQK:
 
         try:
             if data_ref is not None:
+                logger.debug(f"triggering serice job with data pool: {data_ref}.")
                 job = trigger_service_job(
                     service_name=service_name,
                     api_key=self.api_key,
@@ -58,6 +60,7 @@ class PyPlanQK:
                     params=params,
                 )
             else:
+                logger.debug(f"triggering serice job with data upload: {data}.")
                 job = trigger_service_job(
                     service_name=service_name,
                     api_key=self.api_key,
@@ -78,24 +81,29 @@ class PyPlanQK:
     def create_data_pool(self, data_pool_name: Optional[str], file) -> Dict[str, Any]:
         logger.info(f"Create data pool: {data_pool_name}...")
 
+       
+
         try:
             data_pool = get_data_pool(data_pool_name, self.api_key["apiKey"])
 
             if data_pool is not None:
                 logger.info(f"Data pool: {data_pool_name} already created.")
                 return data_pool
+            logger.debug(f"data pool: {data_pool_name} not found. Creating...")
+            logger.debug(f"data pool: {data_pool_name} not found. Creating...")
 
             create_data_pool(data_pool_name, self.api_key["apiKey"])
-
+            logger.debug(f"data pool: {data_pool_name} created. Adding data...")
             add_data_to_data_pool(data_pool_name, file, self.api_key["apiKey"])
-
+            logger.debug(f"data added to data pool")
             file_infos = get_data_pool_file_information(
                 data_pool_name, self.api_key["apiKey"]
             )
-            file_name = file.name.split("/")[-1]
+            file_name = file.name.split(get_path_delimiter)[-1]
             file_info = file_infos[file_name]
             return file_info
         except Exception as e:
             logger.error(f"Creation of data pool: {data_pool_name} failed.")
+            logger.error(f"file: {file.name} could not be added to data pool.")
             logger.error(e)
             raise e
