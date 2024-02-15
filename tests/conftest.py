@@ -1,7 +1,7 @@
-import uuid
-from typing import Tuple
+from typing import Dict, Tuple
 
 import pytest
+from names_generator import generate_name
 from util import *
 
 
@@ -63,7 +63,7 @@ def predict_params() -> Dict[str, Any]:
 @pytest.fixture(scope="function")
 def config() -> Dict[str, Any]:
     config = dict()
-    config["name"] = f"service_{str(uuid.uuid4())}"
+    config["name"] = f"service_{generate_name()}"
     config["user_code"] = open("tests/data/template.zip", "rb")
     config["api_definition"] = open("tests/data/openapi-spec.yml", "rb")
     config["description"] = "Service for unit testing."
@@ -78,7 +78,7 @@ def config() -> Dict[str, Any]:
 
 @pytest.fixture(scope="function")
 def data_pool(api_key: Dict[str, str]) -> Dict[str, Any]:
-    data_pool_name = f"data_pool_{str(uuid.uuid4())}"
+    data_pool_name = f"data_pool_{generate_name()}"
     url = "https://platform.planqk.de/qc-catalog/data-pools"
 
     headers = {"Content-Type": "application/json", "X-Auth-Token": api_key["apiKey"]}
@@ -94,7 +94,7 @@ def data_pool(api_key: Dict[str, str]) -> Dict[str, Any]:
 def data_pool_with_data(
     api_key: Dict[str, str], train_data: Dict[str, list], train_params: Dict[str, list]
 ) -> Dict[str, Any]:
-    data_pool_name = f"data_pool_{str(uuid.uuid4())}"
+    data_pool_name = f"data_pool_{generate_name()}"
     url = "https://platform.planqk.de/qc-catalog/data-pools"
 
     headers = {"Content-Type": "application/json", "X-Auth-Token": api_key["apiKey"]}
@@ -152,14 +152,14 @@ def internally_published_service(
 
 @pytest.fixture(scope="function")
 def simple_application(api_key: Dict[str, str]) -> Dict[str, Any]:
-    application_name = f"application_{str(uuid.uuid4())}"
+    application_name = f"application_{generate_name()}"
     application = create_application(application_name, api_key)
     return application
 
 
 @pytest.fixture(scope="function")
 def application_with_auth(api_key: Dict[str, str]) -> Tuple[Dict[str, Any], str, str]:
-    application_name = f"application_{str(uuid.uuid4())}"
+    application_name = f"application_{generate_name()}"
     application = create_application(application_name, api_key)
     assert application is not None
     print()
@@ -174,7 +174,7 @@ def application_with_auth(api_key: Dict[str, str]) -> Tuple[Dict[str, Any], str,
 def full_application(
     config: Dict[str, Any], api_key: Dict[str, str]
 ) -> Tuple[Dict[str, Any], Dict[str, Any], str, str]:
-    application_name = f"application_{str(uuid.uuid4())}"
+    application_name = f"application_{generate_name()}"
     application = create_application(application_name, api_key)
     print()
     print("Enter consumer_key:")

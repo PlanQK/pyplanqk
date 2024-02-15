@@ -1,19 +1,33 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "setuptools-scm"]
+
 
 [project]
 name = "pyplanqk"
 authors = [{ name = "Henning Krause", email = "henning.krause@gft.com" }, ]
-description = ""
+description = "A python package to interact with the PlanQK platform."
+readme = "README.md"
 requires-python = ">=3.10.6"
+keywords = ["quantum computing"]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
 dependencies = [
-    "pytest",
-    "numpy",
-    "requests",
-    "python-dateutil",
-    "urllib3"
+    "pytest>=8.0.0",
+    "numpy>=1.26.4",
+    "requests>=2.31.0",
+    "python-dateutil>=2.8.2",
+    "urllib3>=2.2.0",
+    "names_generator"
 ]
 dynamic = ["version"]
+
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "node-and-date"
+version_file = "src/pyplanqk/version.py"
 
 
 [tool.pytest.ini_options]
@@ -23,4 +37,4 @@ markers = [
     "slow_service: only run tests wich are slow because of the service creation",
 ]
 log_cli = true
-log_cli_level = "DEBUG"
+log_cli_level = "INFO"

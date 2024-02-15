@@ -1,9 +1,9 @@
 import json
 import logging
-import uuid
 from typing import Any, Dict
 
 from conftest import cleanup_services_and_applications, get_data, get_params
+from names_generator import generate_name
 
 import pyplanqk
 from pyplanqk.low_level_actions import remove_data_pool
@@ -73,7 +73,7 @@ def test_service_job_from_data_pool(config: Dict[str, Any], api_key: Dict[str, s
 
         plnqk = pyplanqk.PyPlanQK(api_key["apiKey"])
 
-        data_pool_name = f"data_pool_{str(uuid.uuid4())}"
+        data_pool_name = f"data_pool_{generate_name()}"
         data_ref = plnqk.create_data_pool(data_pool_name, file=f_data)
         assert data_ref
 

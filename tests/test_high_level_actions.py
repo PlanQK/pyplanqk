@@ -2,6 +2,7 @@ import uuid
 from typing import Tuple
 
 from conftest import cleanup_services_and_applications
+from names_generator import generate_name
 
 from pyplanqk.high_level_actions import PyPlanQK
 from pyplanqk.low_level_actions import *
@@ -171,7 +172,7 @@ def test_create_data_pool(api_key: Dict[str, str]):
         file = open("tests/data/data.json", "rb")
 
         plnqk = PyPlanQK(api_key["apiKey"])
-        data_pool_name = f"data_pool_{str(uuid.uuid4())}"
+        data_pool_name = f"data_pool_{generate_name()}"
         file_info = plnqk.create_data_pool(data_pool_name, file)
         assert file_info is not None
 

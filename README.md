@@ -1,5 +1,5 @@
 # Install
 ````shell
-./install.sh
+.\install.sh
 pip install .
 ````

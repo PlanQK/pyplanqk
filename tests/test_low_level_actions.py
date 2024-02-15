@@ -1,7 +1,7 @@
-import uuid
 from typing import Tuple
 
 import pytest
+from names_generator import generate_name
 from util import *
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def test_create_application(api_key: Dict[str, str]):
     services = []
 
     try:
-        application_name = f"application_{str(uuid.uuid4())}"
+        application_name = f"application_{generate_name()}"
         application = create_application(application_name, api_key)
         assert application is not None
         applications.append(application)
@@ -527,7 +527,7 @@ def test_create_data_pool(api_key: Dict[str, str]):
     print()
     logger.debug("test_create_data_pool")
     try:
-        data_pool_name = f"datapool_{str(uuid.uuid4())}"
+        data_pool_name = f"datapool_{generate_name()}"
         data_pool = create_data_pool(data_pool_name, api_key["apiKey"])
         assert data_pool is not None
 
