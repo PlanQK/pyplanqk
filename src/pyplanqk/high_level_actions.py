@@ -90,7 +90,7 @@ class PyPlanQK:
                 logger.info(f"Data pool: {data_pool_name} already created.")
                 return data_pool
             logger.debug(f"data pool: {data_pool_name} not found. Creating...")
-            print(f"data pool: {data_pool_name} not found. Creating...")
+            logger.debug(f"data pool: {data_pool_name} not found. Creating...")
 
             create_data_pool(data_pool_name, self.api_key["apiKey"])
             logger.debug(f"data pool: {data_pool_name} created. Adding data...")
