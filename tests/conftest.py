@@ -64,8 +64,8 @@ def predict_params() -> Dict[str, Any]:
 def config() -> Dict[str, Any]:
     config = dict()
     config["name"] = f"service_{str(uuid.uuid4())}"
-    config["user_code"] = open("tests/data/template.zip", "rb")
-    config["api_definition"] = open("tests/data/openapi-spec.yml", "rb")
+    config["user_code"] = open(f"{generalTestParameters.testdataPath}template.zip", "rb")
+    config["api_definition"] = open(f"{generalTestParameters.testdataPath}openapi-spec.yml", "rb")
     config["description"] = "Service for unit testing."
     config["milli_cpus"] = 1000
     config["memory_in_megabytes"] = 4096
@@ -106,7 +106,7 @@ def data_pool_with_data(
 
     # save_data(train_data, train_params)
 
-    file = open("tests/data/data.json", "rb")
+    file = open(f"{generalTestParameters.testdataPath}data.json", "rb")
     result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
     assert result
 

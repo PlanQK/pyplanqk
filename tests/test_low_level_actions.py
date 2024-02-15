@@ -1,6 +1,5 @@
 import uuid
 from typing import Tuple
-from conftest import generalTestParameters
 import pytest
 from util import *
 
