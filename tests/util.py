@@ -1,5 +1,3 @@
-from typing import Any, List
-
 import numpy as np
 
 from pyplanqk.low_level_actions import *

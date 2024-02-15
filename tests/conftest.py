@@ -7,7 +7,7 @@ from util import *
 
 @pytest.fixture(scope="function")
 def api_key() -> Dict[str, str]:
-    api_key = "bb7f15afefee47362632a3f04dfdd8ee2f0fd5403a6588191df9465ddcf3a7d1e5d2339b4f83538af2d9b8b98d7fdd7e"
+    api_key = "plqk_4Rk6rDnjDp6D38cRQXgGigFymWpCt3R7jw27kUZAcP"
     api_key = {"apiKey": api_key}
     return api_key
 

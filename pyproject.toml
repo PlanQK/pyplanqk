@@ -1,18 +1,26 @@
 [build-system]
-# AVOID CHANGING REQUIRES: IT WILL BE UPDATED BY PYSCAFFOLD!
-requires = ["setuptools>=46.1.0", "setuptools_scm[toml]>=5"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools"]
 
-[tool.setuptools_scm]
-# For smarter version schemes and other configuration options,
-# check out https://github.com/pypa/setuptools_scm
-version_scheme = "no-guess-dev"
+[project]
+name = "pyplanqk"
+authors = [{ name = "Henning Krause", email = "henning.krause@gft.com" }, ]
+description = ""
+requires-python = ">=3.10.6"
+dependencies = [
+    "pytest",
+    "numpy",
+    "requests",
+    "python-dateutil",
+    "urllib3"
+]
+dynamic = ["version"]
+
 
 [tool.pytest.ini_options]
 markers = [
     "previously_wrong: only run previously wrong tests",
-    "interactive: only run run tests with user interaction",
-    "slow_service: only run run tests wich are slow because of the service creation",
+    "interactive: only run tests with user interaction",
+    "slow_service: only run tests wich are slow because of the service creation",
 ]
 log_cli = true
 log_cli_level = "DEBUG"

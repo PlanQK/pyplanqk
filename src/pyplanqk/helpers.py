@@ -5,8 +5,7 @@ from typing import Dict
 import requests
 
 from openapi_client.api_client import ApiClient
-from openapi_client.apis import (ServicePlatformJobsApi,
-                                 ServicePlatformServicesApi)
+from openapi_client.apis import ServicePlatformJobsApi, ServicePlatformServicesApi
 from openapi_client.configuration import Configuration
 
 logger = logging.getLogger(__name__)

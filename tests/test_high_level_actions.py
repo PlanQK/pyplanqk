@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, Tuple
+from typing import Tuple
 
 from conftest import cleanup_services_and_applications
 

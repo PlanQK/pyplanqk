@@ -1,6 +1,6 @@
 from pyplanqk.low_level_actions import *
 
-logger = logging.getLogger("pyplanqk")
+logger = logging.getLogger(__name__)
 
 
 class PyPlanQK:
