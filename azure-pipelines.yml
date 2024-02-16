@@ -21,5 +21,5 @@ jobs:
     displayName: 'Install Python Package'
 
   - script: |
-      pytest -s -m auto tests/test_end_to_end.py
+      pytest -s -m auto --log-cli-level=DEBUG tests/test_end_to_end.py
     displayName: 'Run pytest'
