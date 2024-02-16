@@ -29,7 +29,6 @@ dynamic = ["version"]
 [project.optional-dependencies]
 dev = [
     "black",
-    "isort",
     "pylint",
     "pytest>=8.0.0",
 ]

@@ -3,8 +3,9 @@ import logging
 from typing import Any, Dict
 
 import pytest
-from conftest import cleanup_services_and_applications, get_data, get_params, get_test_data_path
+from conftest import get_data, get_params, get_test_data_path
 from names_generator import generate_name
+from util import cleanup_services_and_applications
 
 import pyplanqk
 from pyplanqk.low_level_actions import remove_data_pool
