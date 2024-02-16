@@ -8,12 +8,10 @@ Addintionally there are some problems with generating the correct types which ar
 
 # Test
 ````shell
-pytest -s -m MARK .
+pytest -s -m MARK --log-cli-level=LOG_LEVEL .
 ````
 
-Values for **MARK** are defined in the pyproject.toml
+Some tests are marked depending on their behavior. Values for **MARK** are defined in the pyproject.toml
 - **interactive**: only run tests with user interaction
 - **slow_service**: only run tests wich are slow because of the service creation
 - **auto**: only run tests that run fully automatic
-
-By setting **log_cli_level** to **DEBUG** you get a finer logging output.
