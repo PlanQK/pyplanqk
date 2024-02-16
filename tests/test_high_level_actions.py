@@ -1,8 +1,9 @@
-import uuid
 from typing import Tuple
 
+import pytest
 from conftest import cleanup_services_and_applications
 from names_generator import generate_name
+from util import get_test_data_path
 
 from pyplanqk.high_level_actions import PyPlanQK
 from pyplanqk.low_level_actions import *
@@ -10,6 +11,7 @@ from pyplanqk.low_level_actions import *
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.auto
 def test_create_service(config: Dict[str, Any], api_key: Dict[str, str]):
     print()
     logger.debug("test_create_service")
@@ -27,6 +29,7 @@ def test_create_service(config: Dict[str, Any], api_key: Dict[str, str]):
         assert False
 
 
+@pytest.mark.auto
 def test_create_already_created_service(
     service_info: Tuple[Dict[str, Any], Dict[str, Any]], api_key: Dict[str, str]
 ):
@@ -50,6 +53,7 @@ def test_create_already_created_service(
         assert False
 
 
+@pytest.mark.auto
 def test_execute_service_train_data_upload(
     config: Dict[str, Any],
     api_key: Dict[str, str],
@@ -68,11 +72,11 @@ def test_execute_service_train_data_upload(
         assert service is not None
         services.append(service)
 
-        f = open("tests/data/data.json", "w")
+        f = open(f"{get_test_data_path()}data.json", "w")
         json.dump(train_data, f)
         f.close()
 
-        f = open("tests/data/params.json", "w")
+        f = open(f"{get_test_data_path()}params.json", "w")
         json.dump(train_params, f)
         f.close()
 
@@ -87,6 +91,7 @@ def test_execute_service_train_data_upload(
         assert False
 
 
+@pytest.mark.auto
 def test_execute_service_train_data_pool(
     data_pool_with_data: Dict[str, Any],
     config: Dict[str, Any],
@@ -106,7 +111,7 @@ def test_execute_service_train_data_pool(
         assert service is not None
         services.append(service)
 
-        f = open("tests/data/params.json", "w")
+        f = open(f"{get_test_data_path()}params.json", "w")
         json.dump(train_params, f)
         f.close()
 
@@ -126,6 +131,7 @@ def test_execute_service_train_data_pool(
         assert False
 
 
+@pytest.mark.auto
 def test_execute_service_predict(
     config: Dict[str, Any],
     api_key: Dict[str, str],
@@ -164,12 +170,13 @@ def test_execute_service_predict(
         assert False
 
 
+@pytest.mark.auto
 def test_create_data_pool(api_key: Dict[str, str]):
     print()
     logger.debug("test_create_datapool")
-
+    filepath = get_test_data_path() + "data.json"
     try:
-        file = open("tests/data/data.json", "rb")
+        file = open(filepath, "rb")
 
         plnqk = PyPlanQK(api_key["apiKey"])
         data_pool_name = f"data_pool_{generate_name()}"

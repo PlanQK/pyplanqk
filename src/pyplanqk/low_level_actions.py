@@ -1,5 +1,4 @@
 import json
-import os
 from typing import Any, List, Optional
 
 from openapi_client.apis import ServicePlatformApplicationsApi
@@ -718,8 +717,10 @@ def get_data_pool(data_pool_name: str, api_key: str) -> Optional[Dict[str, str]]
         found_data_pool = None
         for data_pool in data_pools:
             if data_pool_name == data_pool["name"]:
+                logger.debug(f"Get Pool: Found it!")
                 found_data_pool = data_pool
-
+                return found_data_pool
+        logger.debug(f"Get Pool: Didn't found it!")
         return found_data_pool
     except Exception as e:
         logger.error("Get data pool failed.")
@@ -781,9 +782,14 @@ def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Dict[st
 
 def add_data_to_data_pool(data_pool_name: str, file, api_key: str) -> bool:
     logger.debug("Add data to data pool.")
-
     try:
-        data_pool = get_data_pool(data_pool_name, api_key)
+        for count in range(10):
+            logger.debug(f"Get pool try: {count+1}")
+            data_pool = get_data_pool(data_pool_name, api_key)
+            if data_pool is not None:
+                break
+            time.sleep(1)
+
         assert data_pool is not None
         data_pool_id = data_pool["id"]
 

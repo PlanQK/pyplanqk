@@ -1,12 +1,17 @@
+from dotenv import load_dotenv
+
 from pyplanqk.low_level_actions import *
 
 logger = logging.getLogger(__name__)
+
+load_dotenv(".env")
+PLANKQ_TOKEN_URL = os.getenv("PLANKQ_TOKEN_URL")
 
 
 class PyPlanQK:
     def __init__(self, api_key):
         self.api_key = {"apiKey": api_key}
-        self.token_url = "https://gateway.platform.planqk.de/token"
+        self.token_url = PLANKQ_TOKEN_URL
 
     def create_service(self, config: Dict[str, Any]) -> Dict[str, Any]:
         service_name = None
@@ -50,6 +55,7 @@ class PyPlanQK:
 
         try:
             if data_ref is not None:
+                logger.debug(f"triggering serice job with data pool: {data_ref}.")
                 job = trigger_service_job(
                     service_name=service_name,
                     api_key=self.api_key,
@@ -58,6 +64,7 @@ class PyPlanQK:
                     params=params,
                 )
             else:
+                logger.debug(f"triggering serice job with data upload: {data}.")
                 job = trigger_service_job(
                     service_name=service_name,
                     api_key=self.api_key,
@@ -84,18 +91,21 @@ class PyPlanQK:
             if data_pool is not None:
                 logger.info(f"Data pool: {data_pool_name} already created.")
                 return data_pool
+            logger.debug(f"data pool: {data_pool_name} not found. Creating...")
+            logger.debug(f"data pool: {data_pool_name} not found. Creating...")
 
             create_data_pool(data_pool_name, self.api_key["apiKey"])
-
+            logger.debug(f"data pool: {data_pool_name} created. Adding data...")
             add_data_to_data_pool(data_pool_name, file, self.api_key["apiKey"])
-
+            logger.debug(f"data added to data pool")
             file_infos = get_data_pool_file_information(
                 data_pool_name, self.api_key["apiKey"]
             )
-            file_name = file.name.split("/")[-1]
+            file_name = file.name.split(get_path_delimiter())[-1]
             file_info = file_infos[file_name]
             return file_info
         except Exception as e:
             logger.error(f"Creation of data pool: {data_pool_name} failed.")
+            logger.error(f"file: {file.name} could not be added to data pool.")
             logger.error(e)
             raise e

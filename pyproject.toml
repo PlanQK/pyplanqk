@@ -19,7 +19,8 @@ dependencies = [
     "requests>=2.31.0",
     "python-dateutil>=2.8.2",
     "urllib3>=2.2.0",
-    "names-generator>=0.1.0"
+    "names-generator>=0.1.0",
+    "python-dotenv>=1.0.1"
 ]
 dynamic = ["version"]
 
@@ -32,9 +33,9 @@ version_file = "src/pyplanqk/version.py"
 
 [tool.pytest.ini_options]
 markers = [
-    "previously_wrong: only run previously wrong tests",
     "interactive: only run tests with user interaction",
     "slow_service: only run tests wich are slow because of the service creation",
+    "auto: only run tests that run fully automatic",
 ]
 log_cli = true
-log_cli_level = "INFO"
+log_cli_level = "DEBUG"

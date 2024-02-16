@@ -1,13 +1,19 @@
-from typing import Dict, Tuple
+from typing import Tuple
 
 import pytest
+from dotenv import load_dotenv
 from names_generator import generate_name
 from util import *
+
+load_dotenv(".env")
+PLANKQ_API_KEY = os.getenv("PLANKQ_API_KEY")
+PLANKQ_TOKEN_URL = os.getenv("PLANKQ_API_KEY")
+PLANQK_DATA_POOL_URL = os.getenv("PLANQK_DATA_POOL_URL")
 
 
 @pytest.fixture(scope="function")
 def api_key() -> Dict[str, str]:
-    api_key = "plqk_4Rk6rDnjDp6D38cRQXgGigFymWpCt3R7jw27kUZAcP"
+    api_key = PLANKQ_API_KEY
     api_key = {"apiKey": api_key}
     return api_key
 
@@ -24,7 +30,7 @@ def step() -> int:
 
 @pytest.fixture(scope="function")
 def token_url() -> str:
-    return "https://gateway.platform.planqk.de/token"
+    return PLANKQ_TOKEN_URL
 
 
 @pytest.fixture(scope="function")
@@ -79,7 +85,7 @@ def config() -> Dict[str, Any]:
 @pytest.fixture(scope="function")
 def data_pool(api_key: Dict[str, str]) -> Dict[str, Any]:
     data_pool_name = f"data_pool_{generate_name()}"
-    url = "https://platform.planqk.de/qc-catalog/data-pools"
+    url = PLANQK_DATA_POOL_URL
 
     headers = {"Content-Type": "application/json", "X-Auth-Token": api_key["apiKey"]}
 
@@ -92,10 +98,10 @@ def data_pool(api_key: Dict[str, str]) -> Dict[str, Any]:
 
 @pytest.fixture(scope="function")
 def data_pool_with_data(
-    api_key: Dict[str, str], train_data: Dict[str, list], train_params: Dict[str, list]
+        api_key: Dict[str, str], train_data: Dict[str, list], train_params: Dict[str, list]
 ) -> Dict[str, Any]:
     data_pool_name = f"data_pool_{generate_name()}"
-    url = "https://platform.planqk.de/qc-catalog/data-pools"
+    url = PLANQK_DATA_POOL_URL
 
     headers = {"Content-Type": "application/json", "X-Auth-Token": api_key["apiKey"]}
 
@@ -106,7 +112,7 @@ def data_pool_with_data(
 
     # save_data(train_data, train_params)
 
-    file = open("tests/data/data.json", "rb")
+    file = open(f"{get_test_data_path()}data.json", "rb")
     result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
     assert result
 
@@ -117,7 +123,7 @@ def data_pool_with_data(
 def access_token() -> str:
     consumer_key = "wC1Dkq6ZPW7CRBUSB1oL5cURA_ga"
     consumer_secret = "o5oiJrJrNLbIuJPGk46vJyHfDj4a"
-    token_url = "https://gateway.platform.planqk.de/token"
+    token_url = PLANKQ_TOKEN_URL
     access_token = get_access_token(consumer_key, consumer_secret, token_url)
     assert access_token is not None
     assert len(access_token) == 1037
@@ -126,7 +132,7 @@ def access_token() -> str:
 
 @pytest.fixture(scope="function")
 def service_info(
-    config: Dict[str, Any], api_key: Dict[str, str]
+        config: Dict[str, Any], api_key: Dict[str, str]
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     service = create_managed_service(config, api_key)
     service_id = service["id"]
@@ -139,7 +145,7 @@ def service_info(
 
 @pytest.fixture(scope="function")
 def internally_published_service(
-    service_info: Tuple[Dict[str, Any], Dict[str, Any]], api_key: Dict[str, str]
+        service_info: Tuple[Dict[str, Any], Dict[str, Any]], api_key: Dict[str, str]
 ) -> Dict[str, Any]:
     simple_service, config = service_info
 
@@ -172,7 +178,7 @@ def application_with_auth(api_key: Dict[str, str]) -> Tuple[Dict[str, Any], str,
 
 @pytest.fixture(scope="function")
 def full_application(
-    config: Dict[str, Any], api_key: Dict[str, str]
+        config: Dict[str, Any], api_key: Dict[str, str]
 ) -> Tuple[Dict[str, Any], Dict[str, Any], str, str]:
     application_name = f"application_{generate_name()}"
     application = create_application(application_name, api_key)
@@ -199,7 +205,7 @@ def full_application(
 
 @pytest.fixture(scope="function")
 def service_job(
-    data: Dict[str, Any], params: Dict[str, Any], api_key: Dict[str, str]
+        data: Dict[str, Any], params: Dict[str, Any], api_key: Dict[str, str]
 ) -> JobDto:
     logger.debug("Trigger service job")
     configuration = Configuration(api_key=api_key)
