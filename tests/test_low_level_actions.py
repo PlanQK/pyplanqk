@@ -1,11 +1,13 @@
-import uuid
 from typing import Tuple
+
 import pytest
+from names_generator import generate_name
 from util import *
 
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.auto
 def test_create_managed_service(config: Dict[str, Any], api_key: Dict[str, str]):
     print()
     logger.debug("test_create_managed_service")
@@ -30,6 +32,7 @@ def test_create_managed_service(config: Dict[str, Any], api_key: Dict[str, str])
         assert False
 
 
+@pytest.mark.auto
 def test_create_application(api_key: Dict[str, str]):
     print()
     logger.debug("test_create_application")
@@ -37,7 +40,7 @@ def test_create_application(api_key: Dict[str, str]):
     services = []
 
     try:
-        application_name = f"application_{str(uuid.uuid4())}"
+        application_name = f"application_{generate_name()}"
         application = create_application(application_name, api_key)
         assert application is not None
         applications.append(application)
@@ -48,6 +51,7 @@ def test_create_application(api_key: Dict[str, str]):
         assert False
 
 
+@pytest.mark.auto
 def test_get_application(api_key: Dict[str, str], simple_application: Dict[str, Any]):
     print()
     logger.debug("test_get_application")
@@ -64,6 +68,7 @@ def test_get_application(api_key: Dict[str, str], simple_application: Dict[str, 
         assert False
 
 
+@pytest.mark.auto
 def test_remove_application(
     api_key: Dict[str, str], simple_application: Dict[str, Any]
 ):
@@ -79,6 +84,7 @@ def test_remove_application(
         assert False
 
 
+@pytest.mark.auto
 @pytest.mark.slow_service
 def test_remove_service(
     api_key: Dict[str, str], service_info: Tuple[Dict[str, Any], Dict[str, Any]]
@@ -98,6 +104,7 @@ def test_remove_service(
         assert False
 
 
+@pytest.mark.auto
 @pytest.mark.slow_service
 def test_get_services(
     api_key: Dict[str, str], service_info: Tuple[Dict[str, Any], Dict[str, Any]]
@@ -120,6 +127,7 @@ def test_get_services(
         assert False
 
 
+@pytest.mark.auto
 @pytest.mark.slow_service
 def test_get_service(
     api_key: Dict[str, str], service_info: Tuple[Dict[str, Any], Dict[str, Any]]
@@ -142,6 +150,7 @@ def test_get_service(
         assert False
 
 
+@pytest.mark.auto
 @pytest.mark.slow_service
 def test_get_version(
     api_key: Dict[str, str], service_info: Tuple[Dict[str, Any], Dict[str, Any]]
@@ -164,6 +173,7 @@ def test_get_version(
         assert False
 
 
+@pytest.mark.auto
 @pytest.mark.slow_service
 def test_publish_service_internally(
     api_key: Dict[str, str], service_info: Tuple[Dict[str, Any], Dict[str, Any]]
@@ -188,6 +198,7 @@ def test_publish_service_internally(
         assert False
 
 
+@pytest.mark.auto
 @pytest.mark.slow_service
 def test_unpublish_service(
     api_key: Dict[str, str], internally_published_service: Dict[str, Any]
@@ -283,6 +294,7 @@ def test_get_access_token(
         assert False
 
 
+@pytest.mark.auto
 @pytest.mark.slow_service
 def test_get_all_service_jobs_for_service(
     service_info: Tuple[Dict[str, Any], Dict[str, Any]], api_key: Dict[str, str]
@@ -369,7 +381,6 @@ def test_trigger_application_job_train(
 
 
 @pytest.mark.interactive
-@pytest.mark.previously_wrong
 @pytest.mark.skip(reason="Update this test.")
 def test_trigger_application_job_predict(
     full_application: Tuple[Dict[str, Any], Dict[str, Any], str, str],
@@ -429,6 +440,7 @@ def test_trigger_application_job_predict(
         assert False
 
 
+@pytest.mark.auto
 @pytest.mark.slow_service
 def test_trigger_service_job_data_upload_train(
     service_info: Tuple[Dict[str, Any], Dict[str, Any]],
@@ -466,6 +478,7 @@ def test_trigger_service_job_data_upload_train(
         assert False
 
 
+@pytest.mark.auto
 @pytest.mark.slow_service
 def test_trigger_service_job_data_pool_train(
     data_pool_with_data: Dict[str, Any],
@@ -488,7 +501,7 @@ def test_trigger_service_job_data_pool_train(
         data_pool_name = data_pool_with_data["name"]
         file_infos = get_data_pool_file_information(data_pool_name, api_key["apiKey"])
 
-        train_data = file_infos[f"{generalTestParameters.testdataPath}data.json"]
+        train_data = file_infos[f"{get_test_data_path()}data.json"]
 
         job = trigger_service_job(
             service_name=service_name,
@@ -510,6 +523,7 @@ def test_trigger_service_job_data_pool_train(
         assert False
 
 
+@pytest.mark.auto
 def test_get_data_pools(api_key: Dict[str, str]):
     print()
     logger.debug("test_get_data_pools")
@@ -522,11 +536,12 @@ def test_get_data_pools(api_key: Dict[str, str]):
         assert False
 
 
+@pytest.mark.auto
 def test_create_data_pool(api_key: Dict[str, str]):
     print()
     logger.debug("test_create_data_pool")
     try:
-        data_pool_name = f"datapool_{str(uuid.uuid4())}"
+        data_pool_name = f"datapool_{generate_name()}"
         data_pool = create_data_pool(data_pool_name, api_key["apiKey"])
         assert data_pool is not None
 
@@ -537,6 +552,7 @@ def test_create_data_pool(api_key: Dict[str, str]):
         assert False
 
 
+@pytest.mark.auto
 def test_remove_data_pool(data_pool: Dict[str, str], api_key: Dict[str, str]):
     print()
     logger.debug("test_remove_data_pool")
@@ -550,12 +566,13 @@ def test_remove_data_pool(data_pool: Dict[str, str], api_key: Dict[str, str]):
         assert False
 
 
+@pytest.mark.auto
 def test_add_data_to_data_pool(data_pool: Dict[str, str], api_key: Dict[str, str]):
     print()
     logger.debug("test_add_data_to_data_pool")
     try:
         data_pool_name = data_pool["name"]
-        file = open(f"{generalTestParameters.testdataPath}data.json", "rb")
+        file = open(f"{get_test_data_path()}data.json", "rb")
         result = add_data_to_data_pool(data_pool_name, file, api_key["apiKey"])
         assert result
 
@@ -566,6 +583,7 @@ def test_add_data_to_data_pool(data_pool: Dict[str, str], api_key: Dict[str, str
         assert False
 
 
+@pytest.mark.auto
 def test_get_data_pool_file_information(
     data_pool_with_data: Dict[str, str], api_key: Dict[str, str]
 ):
@@ -585,6 +603,7 @@ def test_get_data_pool_file_information(
         assert False
 
 
+@pytest.mark.auto
 def test_remove_all_service_jobs(api_key: Dict[str, str]):
     print()
     logger.debug("test_remove_all_service_jobs")

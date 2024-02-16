@@ -1,5 +1,4 @@
 import json
-import os
 from typing import Any, List, Optional
 
 from openapi_client.apis import ServicePlatformApplicationsApi

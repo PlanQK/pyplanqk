@@ -1,13 +1,12 @@
 import logging
+import os
 import time
 from typing import Dict
-import os
 
 import requests
 
 from openapi_client.api_client import ApiClient
-from openapi_client.apis import (ServicePlatformJobsApi,
-                                 ServicePlatformServicesApi)
+from openapi_client.apis import ServicePlatformJobsApi, ServicePlatformServicesApi
 from openapi_client.configuration import Configuration
 
 logger = logging.getLogger(__name__)
@@ -111,9 +110,9 @@ def wait_for_service_job_to_be_finished(
 
 
 def get_path_delimiter() -> str:
-    pathdelimiter : str = ''
-    if os.name == 'nt':
-        pathdelimiter : str = '\\'
-    elif os.name == 'posix':
-        pathdelimiter : str = '/'
-    return pathdelimiter
+    path_delimiter: str = ""
+    if os.name == "nt":
+        path_delimiter: str = "\\"
+    elif os.name == "posix":
+        path_delimiter: str = "/"
+    return path_delimiter

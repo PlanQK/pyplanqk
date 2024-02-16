@@ -1,5 +1,6 @@
 venv
 src/openapi_client
+build
 
 # Temporary and binary files
 *~

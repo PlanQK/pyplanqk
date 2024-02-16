@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Read .env
+source .env
+
 # Install openapi-generator-cli globally
 npm install -g @openapitools/openapi-generator-cli
 
@@ -10,7 +13,7 @@ mkdir generator-output && cd generator-output || exit
 openapi-generator-cli version-manager set 5.4.0
 
 # Generate Python client using the specified OpenAPI URL
-openapi-generator-cli generate -g python -i https://platform.planqk.de/qc-catalog/docs
+openapi-generator-cli generate -g python -i $PLANQK_OPEN_API_SPEC_URL
 
 # Copy the generated client to the parent directory
 cp -R openapi_client ../src

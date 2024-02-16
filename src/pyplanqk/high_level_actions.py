@@ -1,13 +1,17 @@
+from dotenv import load_dotenv
+
 from pyplanqk.low_level_actions import *
 
 logger = logging.getLogger(__name__)
 
+load_dotenv(".env")
+PLANKQ_TOKEN_URL = os.getenv("PLANKQ_TOKEN_URL")
 
 
 class PyPlanQK:
     def __init__(self, api_key):
         self.api_key = {"apiKey": api_key}
-        self.token_url = "https://gateway.platform.planqk.de/token"
+        self.token_url = PLANKQ_TOKEN_URL
 
     def create_service(self, config: Dict[str, Any]) -> Dict[str, Any]:
         service_name = None
@@ -81,8 +85,6 @@ class PyPlanQK:
     def create_data_pool(self, data_pool_name: Optional[str], file) -> Dict[str, Any]:
         logger.info(f"Create data pool: {data_pool_name}...")
 
-       
-
         try:
             data_pool = get_data_pool(data_pool_name, self.api_key["apiKey"])
 
@@ -99,7 +101,7 @@ class PyPlanQK:
             file_infos = get_data_pool_file_information(
                 data_pool_name, self.api_key["apiKey"]
             )
-            file_name = file.name.split(get_path_delimiter)[-1]
+            file_name = file.name.split(get_path_delimiter())[-1]
             file_info = file_infos[file_name]
             return file_info
         except Exception as e:

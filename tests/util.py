@@ -1,4 +1,3 @@
-from typing import Any, List
 import numpy as np
 
 from pyplanqk.low_level_actions import *
@@ -11,8 +10,7 @@ def cleanup_services_and_applications(
     services: List[Dict[str, Any]],
     api_key: Dict[str, str],
 ):
-    logger.info("")
-    logger.info("")
+    print()
     logger.info("cleanup_services_and_applications")
     for application in applications:
         application_name = application["name"]
@@ -42,12 +40,12 @@ def label_data(x):
 
 
 def save_data(train_data: Dict[str, Any], train_params: Dict[str, Any]):
-    d = generalTestParameters.pathdelimiter
-    f = open(f"{generalTestParameters.testdataPath}data.json", "w")
+    d = get_path_delimiter()
+    f = open(f"{get_test_data_path()}data.json", "w")
     json.dump(train_data, f)
     f.close()
 
-    f = open(f"{generalTestParameters.testdataPath}params.json", "w")
+    f = open(f"{get_test_data_path()}params.json", "w")
     json.dump(train_params, f)
     f.close()
 
@@ -83,10 +81,8 @@ def get_data(num_samples_train=80, num_samples_test=20) -> Dict[str, Any]:
 
     return data
 
-class generalTestParameters:
-    pathdelimiter : str = ''
-    if os.name == 'nt':
-        pathdelimiter : str = '\\'
-    elif os.name == 'posix':
-        pathdelimiter : str = '/'
-    testdataPath : str = f'tests{pathdelimiter}data{pathdelimiter}'
+
+def get_test_data_path():
+    path_delimiter = get_path_delimiter()
+    test_data_path = f"tests{path_delimiter}data{path_delimiter}"
+    return test_data_path
