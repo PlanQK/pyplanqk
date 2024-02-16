@@ -17,7 +17,7 @@ jobs:
       addToPath: true
 
   - script: |
-      pip install .
+      pip install .[dev]
     displayName: 'Install Python Package'
 
   - script: |
