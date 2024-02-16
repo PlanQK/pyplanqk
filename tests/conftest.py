@@ -1,9 +1,26 @@
-from typing import Tuple
+import json
+import os
+from typing import Any, Dict, Tuple
 
 import pytest
+import requests
 from dotenv import load_dotenv
 from names_generator import generate_name
-from util import *
+from util import get_data, get_params, get_test_data_path
+
+from openapi_client import ApiClient, Configuration
+from openapi_client.api.service_platform___jobs_api import ServicePlatformJobsApi
+from openapi_client.model.create_job_request import CreateJobRequest
+from openapi_client.model.job_dto import JobDto
+from pyplanqk.helpers import wait_for_service_to_be_created
+from pyplanqk.low_level_actions import (
+    add_data_to_data_pool,
+    create_application,
+    create_managed_service,
+    get_access_token,
+    publish_service_internally,
+    subscribe_application_to_service,
+)
 
 load_dotenv(".env")
 PLANKQ_API_KEY = os.getenv("PLANKQ_API_KEY")
@@ -47,7 +64,7 @@ def train_data() -> Dict[str, list]:
 def predict_data() -> Dict[str, Any]:
     data = get_data()
 
-    predict_data_ = dict()
+    predict_data_ = {}
     predict_data_["model"] = None
     predict_data_["x"] = [data["X_test"][0]]
 
@@ -68,7 +85,7 @@ def predict_params() -> Dict[str, Any]:
 
 @pytest.fixture(scope="function")
 def config() -> Dict[str, Any]:
-    config = dict()
+    config = {}
     config["name"] = f"service_{generate_name()}"
     config["user_code"] = open("tests/data/template.zip", "rb")
     config["api_definition"] = open("tests/data/openapi-spec.yml", "rb")
@@ -98,7 +115,7 @@ def data_pool(api_key: Dict[str, str]) -> Dict[str, Any]:
 
 @pytest.fixture(scope="function")
 def data_pool_with_data(
-        api_key: Dict[str, str], train_data: Dict[str, list], train_params: Dict[str, list]
+    api_key: Dict[str, str], train_data: Dict[str, list], train_params: Dict[str, list]
 ) -> Dict[str, Any]:
     data_pool_name = f"data_pool_{generate_name()}"
     url = PLANQK_DATA_POOL_URL
@@ -131,9 +148,7 @@ def access_token() -> str:
 
 
 @pytest.fixture(scope="function")
-def service_info(
-        config: Dict[str, Any], api_key: Dict[str, str]
-) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+def service_info(config: Dict[str, Any], api_key: Dict[str, str]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     service = create_managed_service(config, api_key)
     service_id = service["id"]
     version_id = service["service_definitions"][0]["id"]
@@ -145,7 +160,7 @@ def service_info(
 
 @pytest.fixture(scope="function")
 def internally_published_service(
-        service_info: Tuple[Dict[str, Any], Dict[str, Any]], api_key: Dict[str, str]
+    service_info: Tuple[Dict[str, Any], Dict[str, Any]], api_key: Dict[str, str]
 ) -> Dict[str, Any]:
     simple_service, config = service_info
 
@@ -177,9 +192,7 @@ def application_with_auth(api_key: Dict[str, str]) -> Tuple[Dict[str, Any], str,
 
 
 @pytest.fixture(scope="function")
-def full_application(
-        config: Dict[str, Any], api_key: Dict[str, str]
-) -> Tuple[Dict[str, Any], Dict[str, Any], str, str]:
+def full_application(config: Dict[str, Any], api_key: Dict[str, str]) -> Tuple[Dict[str, Any], Dict[str, Any], str, str]:
     application_name = f"application_{generate_name()}"
     application = create_application(application_name, api_key)
     print()
@@ -204,10 +217,7 @@ def full_application(
 
 
 @pytest.fixture(scope="function")
-def service_job(
-        data: Dict[str, Any], params: Dict[str, Any], api_key: Dict[str, str]
-) -> JobDto:
-    logger.debug("Trigger service job")
+def service_job(data: Dict[str, Any], params: Dict[str, Any], api_key: Dict[str, str]) -> JobDto:
     configuration = Configuration(api_key=api_key)
     api_client = ApiClient(configuration=configuration)
     service_jobs_api = ServicePlatformJobsApi(api_client=api_client)

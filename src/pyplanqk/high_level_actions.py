@@ -1,6 +1,21 @@
+import logging
+import os
+from typing import Any, Dict, Optional
+
 from dotenv import load_dotenv
 
-from pyplanqk.low_level_actions import *
+from pyplanqk.helpers import get_path_delimiter, wait_for_service_to_be_created
+from pyplanqk.low_level_actions import (
+    add_data_to_data_pool,
+    create_data_pool,
+    create_managed_service,
+    get_data_pool,
+    get_data_pool_file_information,
+    get_service,
+    get_service_job_result,
+    get_version,
+    trigger_service_job,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -17,11 +32,12 @@ class PyPlanQK:
         service_name = None
         try:
             service_name = config["name"]
-            logger.info(f"Create service: {service_name}.")
+            logger.info("Create service: %s.", service_name)
             service = get_service(service_name, self.api_key)
 
             if service is not None:
-                logger.info(f"Service: {service_name} already created.")
+                logger.info("Service: %s already created.", service_name)
+
                 return service
 
             service = create_managed_service(config, self.api_key)
@@ -29,18 +45,16 @@ class PyPlanQK:
             version = get_version(service_name, self.api_key)
             service_id = service["id"]
             version_id = version["id"]
-            wait_for_service_to_be_created(
-                service_id, version_id, self.api_key, timeout=500, step=5
-            )
+            wait_for_service_to_be_created(service_id, version_id, self.api_key, timeout=500, step=5)
 
             service = get_service(service_name, self.api_key)
-            logger.info(f"Service: {service_name} created.")
+            logger.info("Service: %s created.", service_name)
             return service
         except Exception as e:
             if service_name is not None:
-                logger.error(f"Creation of service: {service_name} failed.")
+                logger.error("Creation of service: %s failed.", service_name)
             else:
-                logger.error(f"Creation of service failed.")
+                logger.error("Creation of service failed.")
             logger.error(e)
             raise e
 
@@ -51,11 +65,11 @@ class PyPlanQK:
         data: Dict[str, Any] = None,
         data_ref: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
-        logger.info(f"Execute service: {service_name}.")
+        logger.info("Execute service: %s.", service_name)
 
         try:
             if data_ref is not None:
-                logger.debug(f"triggering serice job with data pool: {data_ref}.")
+                logger.debug("triggering service job with data pool: %s.", data_ref)
                 job = trigger_service_job(
                     service_name=service_name,
                     api_key=self.api_key,
@@ -64,7 +78,7 @@ class PyPlanQK:
                     params=params,
                 )
             else:
-                logger.debug(f"triggering serice job with data upload: {data}.")
+                logger.debug("triggering service job with data upload: %s.", data)
                 job = trigger_service_job(
                     service_name=service_name,
                     api_key=self.api_key,
@@ -75,37 +89,35 @@ class PyPlanQK:
 
             job_id = job["id"]
             result = get_service_job_result(job_id, self.api_key)
-            logger.info(f"Service execution: {service_name} finished.")
+            logger.info("Service execution: %s finished.", service_name)
             return result
         except Exception as e:
-            logger.error(f"Service execution: {service_name} failed.")
+            logger.error("Service execution: %s failed.", service_name)
             logger.error(e)
             raise e
 
     def create_data_pool(self, data_pool_name: Optional[str], file) -> Dict[str, Any]:
-        logger.info(f"Create data pool: {data_pool_name}...")
+        logger.info("Create data pool: %s...", data_pool_name)
 
         try:
             data_pool = get_data_pool(data_pool_name, self.api_key["apiKey"])
 
             if data_pool is not None:
-                logger.info(f"Data pool: {data_pool_name} already created.")
+                logger.info("Data pool: %s already created.", data_pool_name)
+
                 return data_pool
-            logger.debug(f"data pool: {data_pool_name} not found. Creating...")
-            logger.debug(f"data pool: {data_pool_name} not found. Creating...")
+            logger.debug("data pool: %s not found. Creating...", data_pool_name)
 
             create_data_pool(data_pool_name, self.api_key["apiKey"])
-            logger.debug(f"data pool: {data_pool_name} created. Adding data...")
+            logger.debug("data pool: %s created. Adding data...", data_pool_name)
             add_data_to_data_pool(data_pool_name, file, self.api_key["apiKey"])
-            logger.debug(f"data added to data pool")
-            file_infos = get_data_pool_file_information(
-                data_pool_name, self.api_key["apiKey"]
-            )
+            logger.debug("data added to data pool")
+            file_infos = get_data_pool_file_information(data_pool_name, self.api_key["apiKey"])
             file_name = file.name.split(get_path_delimiter())[-1]
             file_info = file_infos[file_name]
             return file_info
         except Exception as e:
-            logger.error(f"Creation of data pool: {data_pool_name} failed.")
-            logger.error(f"file: {file.name} could not be added to data pool.")
+            logger.error("Creation of data pool: %s failed.", data_pool_name)
+            logger.error("file: %s could not be added to data pool.", file.name)
             logger.error(e)
             raise e

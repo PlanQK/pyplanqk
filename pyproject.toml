@@ -5,16 +5,16 @@ requires = ["setuptools", "setuptools-scm"]
 [project]
 name = "pyplanqk"
 authors = [{ name = "Henning Krause", email = "henning.krause@gft.com" }, ]
+maintainers  = [{ name = "Henning Krause", email = "henning.krause@gft.com" }, ]
 description = "A python package to interact with the PlanQK platform."
 readme = "README.md"
-requires-python = ">=3.10.6"
-keywords = ["quantum computing"]
+keywords = ["quantum", "quantum computing", "planqk"]
 license = {text = "MIT"}
 classifiers = [
+    "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "pytest>=8.0.0",
     "numpy>=1.26.4",
     "requests>=2.31.0",
     "python-dateutil>=2.8.2",
@@ -22,7 +22,29 @@ dependencies = [
     "names-generator>=0.1.0",
     "python-dotenv>=1.0.1"
 ]
+requires-python = ">=3.10.6"
 dynamic = ["version"]
+
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "isort",
+    "pylint",
+    "pytest>=8.0.0",
+]
+
+
+[project.urls]
+Homepage = "https://planqk.de/"
+
+
+[tool.black]
+line-length=121
+
+
+[tool.pylint]
+max-line-length=121
 
 
 [tool.setuptools_scm]

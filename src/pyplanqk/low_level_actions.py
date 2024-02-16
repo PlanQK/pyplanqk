@@ -1,16 +1,24 @@
 import json
-from typing import Any, List, Optional
+import logging
+import os
+import time
+from typing import Any, Dict, List, Optional
 
+import requests
+
+from openapi_client import ApiClient, Configuration
+from openapi_client.api.service_platform___jobs_api import ServicePlatformJobsApi
+from openapi_client.api.service_platform___services_api import ServicePlatformServicesApi
 from openapi_client.apis import ServicePlatformApplicationsApi
-from openapi_client.models import *
-from pyplanqk.helpers import *
+from openapi_client.model.create_application_request import CreateApplicationRequest
+from openapi_client.model.create_job_request import CreateJobRequest
+from openapi_client.model.data_pool_ref import DataPoolRef
+from pyplanqk.helpers import wait_for_service_job_to_be_finished
 
 logger = logging.getLogger(__name__)
 
 
-def create_managed_service(
-    config: Dict[str, Any], api_key: Dict[str, str]
-) -> Dict[str, Any]:
+def create_managed_service(config: Dict[str, Any], api_key: Dict[str, str]) -> Dict[str, Any]:
     logger.debug("Create managed service.")
 
     configuration = Configuration(api_key=api_key)
@@ -28,9 +36,7 @@ def create_managed_service(
         raise e
 
 
-def create_application(
-    application_name: str, api_key: Dict[str, str]
-) -> Dict[str, Any]:
+def create_application(application_name: str, api_key: Dict[str, str]) -> Dict[str, Any]:
     logger.debug("Create application.")
 
     configuration = Configuration(api_key=api_key)
@@ -39,9 +45,7 @@ def create_application(
 
     try:
         create_app_request = CreateApplicationRequest(name=application_name)
-        application = applications_api.create_application(
-            create_application_request=create_app_request
-        )
+        application = applications_api.create_application(create_application_request=create_app_request)
         logger.debug("Application created.")
         return application
     except Exception as e:
@@ -50,9 +54,7 @@ def create_application(
         raise e
 
 
-def publish_service_internally(
-    service_name: str, api_key: Dict[str, str]
-) -> Dict[str, Any]:
+def publish_service_internally(service_name: str, api_key: Dict[str, str]) -> Dict[str, Any]:
     logger.debug("Publish service internally.")
 
     configuration = Configuration(api_key=api_key)
@@ -152,9 +154,7 @@ def remove_subscription(application_name: str, api_key: Dict[str, str]) -> bool:
         subscription = get_subscription(application_name, api_key)
         application_id = application["id"]
         subscription_id = subscription["id"]
-        applications_api.delete_application_subscription(
-            application_id, subscription_id
-        )
+        applications_api.delete_application_subscription(application_id, subscription_id)
         logger.debug("Subscription removed.")
         return True
     except Exception as e:
@@ -179,9 +179,7 @@ def subscribe_application_to_service(
         assert application is not None
         service_id = service["id"]
         application_id = application["id"]
-        subscription_request = CreateInternalSubscriptionRequest(
-            application_id=application_id, service_id=service_id
-        )
+        subscription_request = CreateInternalSubscriptionRequest(application_id=application_id, service_id=service_id)
         subscription = applications_api.create_internal_subscription(
             id=application_id, create_internal_subscription_request=subscription_request
         )
@@ -193,9 +191,7 @@ def subscribe_application_to_service(
         raise e
 
 
-def get_application(
-    application_name: str, api_key: Dict[str, str]
-) -> Optional[Dict[str, Any]]:
+def get_application(application_name: str, api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
     logger.debug("Get application.")
 
     configuration = Configuration(api_key=api_key)
@@ -216,9 +212,7 @@ def get_application(
         raise e
 
 
-def get_services(
-    api_key: Dict[str, str], lifecycle: str = None
-) -> List[Dict[str, Any]]:
+def get_services(api_key: Dict[str, str], lifecycle: str = None) -> List[Dict[str, Any]]:
     logger.debug("Get services.")
 
     configuration = Configuration(api_key=api_key)
@@ -287,9 +281,7 @@ def get_version(service_name: str, api_key: Dict[str, str]) -> Dict[str, Any]:
         raise e
 
 
-def get_all_subscriptions(
-    application_name: str, api_key: Dict[str, str]
-) -> List[Dict[str, Any]]:
+def get_all_subscriptions(application_name: str, api_key: Dict[str, str]) -> List[Dict[str, Any]]:
     logger.debug("Get subscriptions.")
 
     configuration = Configuration(api_key=api_key)
@@ -308,9 +300,7 @@ def get_all_subscriptions(
         raise e
 
 
-def get_subscription(
-    application_name: str, api_key: Dict[str, str]
-) -> Optional[Dict[str, Any]]:
+def get_subscription(application_name: str, api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
     logger.debug("Get subscriptions.")
 
     configuration = Configuration(api_key=api_key)
@@ -337,11 +327,7 @@ def get_access_token(consumer_key: str, consumer_secret: str, token_url: str) ->
         data = {"grant_type": "client_credentials"}
 
         response = requests.post(
-            token_url,
-            data=data,
-            verify=False,
-            allow_redirects=False,
-            auth=(consumer_key, consumer_secret),
+            token_url, data=data, verify=False, allow_redirects=False, auth=(consumer_key, consumer_secret), timeout=30
         )
         assert response.status_code in [200, 201, 204]
         json_response = response.json()
@@ -352,9 +338,7 @@ def get_access_token(consumer_key: str, consumer_secret: str, token_url: str) ->
         raise e
 
 
-def get_all_jobs_for_managed_service(
-    service_name: str, api_key: Dict[str, str]
-) -> List[Dict[str, Any]]:
+def get_all_jobs_for_managed_service(service_name: str, api_key: Dict[str, str]) -> List[Dict[str, Any]]:
     logger.debug("Get all service jobs for managed service.")
 
     configuration = Configuration(api_key=api_key)
@@ -393,9 +377,7 @@ def get_all_service_jobs(api_key: Dict[str, str]) -> List[Dict[str, Any]]:
         raise e
 
 
-def get_service_jobs(
-    service_name: str, api_key: Dict[str, str]
-) -> List[Dict[str, Any]]:
+def get_service_jobs(service_name: str, api_key: Dict[str, str]) -> List[Dict[str, Any]]:
     logger.debug("Get service jobs for service.")
 
     configuration = Configuration(api_key=api_key)
@@ -420,9 +402,7 @@ def get_service_jobs(
         raise e
 
 
-def get_managed_service_job(
-    service_name: str, job_id: str, api_key: Dict[str, str]
-) -> Optional[Dict[str, Any]]:
+def get_managed_service_job(service_name: str, job_id: str, api_key: Dict[str, str]) -> Optional[Dict[str, Any]]:
     logger.debug("Get managed service job.")
 
     try:
@@ -478,7 +458,7 @@ def trigger_application_job(
 
         payload = {"data": data, "params": params}
 
-        response = requests.post(service_endpoint, json=payload, headers=headers)
+        response = requests.post(service_endpoint, json=payload, headers=headers, timeout=30)
         assert response.status_code in [200, 201, 204]
         json_response = response.json()
         return json_response
@@ -525,13 +505,11 @@ def trigger_service_job(
                 persist_result=True,
             )
         else:
-            raise Exception(
-                "Invalid mode, allowed modes are: [DATA_UPLOAD, DATA_POOL]."
-            )
+            raise Exception("Invalid mode, allowed modes are: [DATA_UPLOAD, DATA_POOL].")
 
         job = service_jobs_api.create_job(create_job_request=create_job_request)
         job_id = job["id"]
-        logger.info(f"Started service job: {job_id}.")
+        logger.info("Started service job: %s.", job_id)
         wait_for_service_job_to_be_finished(job_id, api_key, timeout=timeout, step=step)
         job = service_jobs_api.get_job(job_id)
         return job
@@ -609,7 +587,7 @@ def get_application_job_info(
             "Authorization": f"Bearer {access_token}",
         }
 
-        response = requests.get(service_endpoint, headers=headers)
+        response = requests.get(service_endpoint, headers=headers, timeout=30)
         json_response = response.json()
         return json_response
     except Exception as e:
@@ -618,9 +596,7 @@ def get_application_job_info(
         raise e
 
 
-def get_application_job_status(
-    service_name: str, job_id: str, access_token: str, api_key: Dict[str, str]
-) -> str:
+def get_application_job_status(service_name: str, job_id: str, access_token: str, api_key: Dict[str, str]) -> str:
     logger.debug("Get application job status.")
 
     try:
@@ -633,7 +609,7 @@ def get_application_job_status(
             "Authorization": f"Bearer {access_token}",
         }
 
-        response = requests.get(service_endpoint, headers=headers)
+        response = requests.get(service_endpoint, headers=headers, timeout=30)
         json_response = response.json()
         status = json_response["status"]
         return status
@@ -658,7 +634,7 @@ def get_application_job_result(
             "Authorization": f"Bearer {access_token}",
         }
 
-        response = requests.get(service_endpoint, headers=headers)
+        response = requests.get(service_endpoint, headers=headers, timeout=30)
         assert response.status_code in [200, 201, 204]
         json_response = response.json()
         result = json_response["result"]
@@ -677,7 +653,7 @@ def get_data_pools(api_key: str) -> List[Dict[str, Any]]:
 
         headers = {"Content-Type": "application/json", "X-Auth-Token": api_key}
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=30)
         assert response.status_code in [200, 201, 204]
         data_pools = response.json()["content"]
         return data_pools
@@ -697,7 +673,7 @@ def create_data_pool(data_pool_name: str, api_key: str) -> Dict[str, Any]:
 
         data = {"name": data_pool_name}
 
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, json=data, timeout=30)
         assert response.status_code in [200, 201, 204]
         data_pool = response.json()
         return data_pool
@@ -717,10 +693,11 @@ def get_data_pool(data_pool_name: str, api_key: str) -> Optional[Dict[str, str]]
         found_data_pool = None
         for data_pool in data_pools:
             if data_pool_name == data_pool["name"]:
-                logger.debug(f"Get Pool: Found it!")
+                logger.debug("Get Pool: Found it!")
                 found_data_pool = data_pool
                 return found_data_pool
-        logger.debug(f"Get Pool: Didn't found it!")
+        logger.debug("Get Pool: Didn't found it!")
+
         return found_data_pool
     except Exception as e:
         logger.error("Get data pool failed.")
@@ -740,7 +717,7 @@ def remove_data_pool(data_pool_name: str, api_key: str) -> bool:
         data_pool_id = data_pool["id"]
         url = f"https://platform.planqk.de/qc-catalog/data-pools/{data_pool_id}"
 
-        response = requests.delete(url, headers=headers)
+        response = requests.delete(url, headers=headers, timeout=30)
         result = response.status_code in [200, 201, 204]
         return result
     except Exception as e:
@@ -761,14 +738,14 @@ def get_data_pool_file_information(data_pool_name: str, api_key: str) -> Dict[st
 
         headers = {"Content-Type": "application/json", "X-Auth-Token": api_key}
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=30)
         assert response.status_code in [200, 201, 204]
         response_json = response.json()
 
-        file_infos = dict()
+        file_infos = {}
         for entry in response_json:
             name = entry["files"][0]["name"]
-            file_infos[name] = dict()
+            file_infos[name] = {}
             file_infos[name]["identifier"] = name
             file_infos[name]["data_pool_id"] = data_pool_id
             file_infos[name]["data_source_descriptor_id"] = entry["id"]
@@ -784,7 +761,7 @@ def add_data_to_data_pool(data_pool_name: str, file, api_key: str) -> bool:
     logger.debug("Add data to data pool.")
     try:
         for count in range(10):
-            logger.debug(f"Get pool try: {count+1}")
+            logger.debug("Get pool try: %d", count + 1)
             data_pool = get_data_pool(data_pool_name, api_key)
             if data_pool is not None:
                 break
@@ -799,7 +776,7 @@ def add_data_to_data_pool(data_pool_name: str, file, api_key: str) -> bool:
 
         files = {"file": file}
 
-        response = requests.post(url, headers=headers, files=files)
+        response = requests.post(url, headers=headers, files=files, timeout=30)
         result = response.status_code in [200, 201, 204]
         return result
     except Exception as e:

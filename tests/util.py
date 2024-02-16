@@ -41,15 +41,13 @@ def label_data(x):
 
 def save_data(train_data: Dict[str, Any], train_params: Dict[str, Any]):
     d = get_path_delimiter()
-    f = open(f"{get_test_data_path()}data.json", "w")
-    json.dump(train_data, f)
-    f.close()
+    with open(f"{get_test_data_path()}data.json", "w") as f:
+        json.dump(train_data, f)
 
-    f = open(f"{get_test_data_path()}params.json", "w")
-    json.dump(train_params, f)
-    f.close()
+    with open(f"{get_test_data_path()}params.json", "w") as f:
+        json.dump(train_params, f)
 
-    data = dict()
+    data = {}
     data["data"] = train_data
     data["params"] = train_params
 
@@ -59,7 +57,7 @@ def save_data(train_data: Dict[str, Any], train_params: Dict[str, Any]):
 
 
 def get_params(maxiter=30, reps=1):
-    params = dict()
+    params = {}
 
     params["mode"] = "train"
     params["maxiter"] = maxiter
@@ -69,7 +67,7 @@ def get_params(maxiter=30, reps=1):
 
 
 def get_data(num_samples_train=80, num_samples_test=20) -> Dict[str, Any]:
-    data = dict()
+    data = {}
 
     x_train = np.random.uniform(-1.0, 1.0, size=(num_samples_train, 2))
     data["X_train"] = x_train.tolist()
