@@ -9,10 +9,11 @@ maintainers  = [{ name = "Henning Krause", email = "henning.krause@gft.com" }, ]
 description = "A python package to interact with the PlanQK platform."
 readme = "README.md"
 keywords = ["quantum", "quantum computing", "planqk"]
-license = {text = "MIT"}
+license = {text = "apache-2.0"}
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    'License :: OSI Approved :: Apache Software License'
 ]
 dependencies = [
     "numpy>=1.26.4",
