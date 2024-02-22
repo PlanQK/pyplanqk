@@ -1,4 +1,5 @@
 # Install
+Generate openapi client and install dependencies.
 ````shell
 .\install.sh
 pip install .
@@ -7,6 +8,12 @@ In *install.sh* the python client library is generated from the openapi-spec at 
 Addintionally there are some problems with generating the correct types which are also handled by replacing the lines with the script.
 
 # Test
+Install dev dependencies.
+````shell
+pip install .[dev]
+````
+
+Execute tests.
 ````shell
 pytest -s -m MARK --log-cli-level=LOG_LEVEL .
 ````

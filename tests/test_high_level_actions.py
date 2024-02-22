@@ -1,7 +1,7 @@
 from typing import Tuple
 
 import pytest
-from conftest import cleanup_services_and_applications
+from util import cleanup_services_and_applications
 from names_generator import generate_name
 from util import get_test_data_path
 

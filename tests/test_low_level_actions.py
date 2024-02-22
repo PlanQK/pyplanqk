@@ -32,7 +32,7 @@ from pyplanqk.low_level_actions import (
     trigger_service_job,
     unpublish_service,
 )
-from tests.util import cleanup_services_and_applications, get_test_data_path
+from util import cleanup_services_and_applications, get_test_data_path
 
 logger = logging.getLogger(__name__)
 
