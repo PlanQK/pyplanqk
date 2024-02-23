@@ -29,6 +29,22 @@ class PyPlanQK:
         self.token_url = PLANKQ_TOKEN_URL
 
     def create_service(self, config: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        The create_service function creates a service in the Watson Machine Learning instance.
+            Args:
+                config (dict): A dictionary containing the configuration for creating a service.
+
+        Args:
+            self: Refer to the instance of the class
+            config: Dict[str: Pass the configuration of the service to be created
+            Any]: Specify the type of the parameter
+
+        Returns:
+            A dictionary with the following keys:
+
+        Doc Author:
+            Trelent
+        """
         service_name = None
         try:
             service_name = config["name"]
@@ -65,6 +81,26 @@ class PyPlanQK:
         data: Dict[str, Any] = None,
         data_ref: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
+        """
+        The execute_service function is used to execute a service.
+
+        Args:
+            self: Bind the function to a class
+            service_name: str: Specify the name of the service to be executed
+            params: Dict[str: Pass the parameters to the service
+            Any]: Define the type of data that is passed to the function
+            data: Dict[str: Pass the data to be processed by the service
+            Any]: Specify the type of data that is returned by the function
+            data_ref: Dict[str: Pass the data pool reference
+            Any]: Define the type of the data that is passed to the function
+            : Pass the service name to the function
+
+        Returns:
+            The result of the service execution
+
+        Doc Author:
+            Trelent
+        """
         logger.info("Execute service: %s.", service_name)
 
         try:
@@ -97,6 +133,21 @@ class PyPlanQK:
             raise e
 
     def create_data_pool(self, data_pool_name: Optional[str], file) -> Dict[str, Any]:
+        """
+        The create_data_pool function creates a data pool with the given name and adds the file to it.
+            If a data pool with that name already exists, then it will not be created again.
+
+        Args:
+            self: Bind the method to an object
+            data_pool_name: Optional[str]: Specify the name of the data pool
+            file: Create a data pool
+
+        Returns:
+            A dictionary with the following keys:
+
+        Doc Author:
+            Trelent
+        """
         logger.info("Create data pool: %s...", data_pool_name)
 
         try:
