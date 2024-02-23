@@ -29,9 +29,15 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 dev = [
-    "black",
-    "pylint",
+    "black>=23.11.0",
+    "pylint>=3.0.3",
     "pytest>=8.0.0",
+    "mkdocs>=1.5.2",
+    "mkdocs-material>=9.5.10",
+    "mkdocstrings>=0.24.0",
+    "mkdocstrings-python>=1.8.0",
+    "mkdocs-git-committers-plugin-2>=2.2.3",
+    "mkdocs-git-revision-date-localized-plugin>=1.2.4"
 ]
 
 
