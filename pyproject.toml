@@ -5,11 +5,11 @@ requires = ["setuptools", "setuptools-scm"]
 [project]
 name = "pyplanqk"
 authors = [{ name = "Henning Krause", email = "henning.krause@gft.com" }, ]
-maintainers  = [{ name = "Henning Krause", email = "henning.krause@gft.com" }, ]
+maintainers = [{ name = "Henning Krause", email = "henning.krause@gft.com" }, ]
 description = "A python package to interact with the PlanQK platform."
 readme = "README.md"
 keywords = ["quantum", "quantum computing", "planqk"]
-license = {text = "apache-2.0"}
+license = { text = "apache-2.0" }
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -33,7 +33,7 @@ dev = [
     "pylint>=3.0.3",
     "pytest>=8.0.0",
     "mkdocs>=1.5.2",
-    "write-the @ git+ssh://git@github.com/hgkegft/write-the.git@hotfix", # Hotfix, switch to original package when PR is merged.
+    "write-the>=0.10.1",
     "mkdocs-material>=9.5.10",
     "mkdocstrings>=0.24.0",
     "mkdocstrings-python>=1.8.0",
@@ -47,11 +47,11 @@ Homepage = "https://planqk.de/"
 
 
 [tool.black]
-line-length=121
+line-length = 121
 
 
 [tool.pylint]
-max-line-length=121
+max-line-length = 121
 
 
 [tool.setuptools_scm]
