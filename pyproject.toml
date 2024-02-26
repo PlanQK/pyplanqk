@@ -33,6 +33,7 @@ dev = [
     "pylint>=3.0.3",
     "pytest>=8.0.0",
     "mkdocs>=1.5.2",
+    "write-the @ git+ssh://git@github.com/hgkegft/write-the.git@hotfix", # Hotfix, switch to original package when PR is merged.
     "mkdocs-material>=9.5.10",
     "mkdocstrings>=0.24.0",
     "mkdocstrings-python>=1.8.0",
