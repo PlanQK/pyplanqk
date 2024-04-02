@@ -176,9 +176,4 @@ def get_path_delimiter() -> str:
     Doc Author:
         Trelent
     """
-    path_delimiter: str = ""
-    if os.name == "nt":
-        path_delimiter: str = "\\"
-    elif os.name == "posix":
-        path_delimiter: str = "/"
-    return path_delimiter
+    return "/"
