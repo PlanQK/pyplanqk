@@ -30,7 +30,7 @@ class PyPlanQK:
 
     def create_service(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """
-        The create_service function creates a service in the Watson Machine Learning instance.
+        The create_service function creates a service on PlanQK.
             Args:
                 config (dict): A dictionary containing the configuration for creating a service.
 
